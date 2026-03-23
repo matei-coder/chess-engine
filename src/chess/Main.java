@@ -5,9 +5,10 @@ public class Main {
         Board board = new Board();
         board.print();
 
-        Evaluator eval = new Evaluator();
-        int score = eval.evaluate(board);
-        System.out.println("Scor pozitie initiala: " + score);
-        // Pozitia initiala e simetrica → scorul trebuie sa fie 0
+        Search search = new Search();
+
+        System.out.println("Caut cea mai buna mutare pentru alb (adancime 3)...");
+        Move best = search.findBestMove(board, Piece.WHITE, 3);
+        System.out.println("Cea mai buna mutare: " + best);
     }
 }
