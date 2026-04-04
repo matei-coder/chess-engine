@@ -1,0 +1,36 @@
+token: "PUNE_TOKENUL_TAU_AICI"
+
+url: "https://lichess.org"
+
+engine:
+  dir: "C:/Users/user/Desktop/chess-engine"
+  name: "run_engine.bat"
+  protocol: uci
+  silence_stderr: false
+
+  uci_options:
+    Threads: 1
+
+abort_time: 20
+move_overhead: 500
+online_moves:
+  sources: []
+
+challenge:
+  concurrency: 1
+  sort_by: "best"
+  accept_bot: false
+  only_bot: false
+  min_increment: 0
+  max_increment: 180
+  min_base: 0
+  max_base: 3600
+  variants:
+    - standard
+  time_controls:
+    - bullet
+    - blitz
+    - rapid
+  modes:
+    - casual
+    - rated

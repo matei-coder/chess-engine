@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(java -version)",
+      "Bash(javac -version)",
+      "Bash(printf \"uci\\\\nquit\\\\n\")",
+      "Bash(run_engine.bat)",
+      "Bash(printf \"uci\\\\nisready\\\\nquit\\\\n\")",
+      "Bash(\"C:\\\\Program Files\\\\Eclipse Adoptium\\\\jdk-21.0.8.9-hotspot\\\\bin\\\\java.exe\" -cp out chess.Main uci)",
+      "Bash(javac -d out src/chess/*.java)"
+    ]
+  }
+}

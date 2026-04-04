@@ -67,6 +67,13 @@ public class Board {
         squares[index] = piece;
     }
 
+    // Sterge toate piesele si reseteaza starea (folosit de FenParser)
+    public void clear() {
+        java.util.Arrays.fill(squares, Piece.NONE);
+        enPassantSquare = -1;
+        castlingRights  = new boolean[]{ false, false, false, false };
+    }
+
     public int getEnPassantSquare() { return enPassantSquare; }
     public void setEnPassantSquare(int sq) { enPassantSquare = sq; }
 

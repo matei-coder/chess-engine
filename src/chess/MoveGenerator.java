@@ -185,19 +185,29 @@ public class MoveGenerator {
 
     private void generateCastlingMoves(Board board, int sq, int color, List<Move> moves) {
         boolean[] rights = board.getCastlingRights();
+        int opp = (color == Piece.WHITE) ? Piece.BLACK : Piece.WHITE;
+
+        // Regele nu poate roca daca e in sah
+        if (isSquareAttacked(board, sq, opp)) return;
 
         if (color == Piece.WHITE && sq == 4) {
             // Rocada mica alba (e1-g1)
+            // Patratele f1(5) si g1(6) trebuie sa fie libere si neatacare
             if (rights[0] &&
                 Piece.isEmpty(board.getSquare(5)) &&
-                Piece.isEmpty(board.getSquare(6))) {
+                Piece.isEmpty(board.getSquare(6)) &&
+                !isSquareAttacked(board, 5, opp) &&
+                !isSquareAttacked(board, 6, opp)) {
                 moves.add(new Move(sq, 6, Move.FLAG_CASTLING));
             }
             // Rocada mare alba (e1-c1)
+            // Patratele d1(3) si c1(2) nu pot fi atacate (b1(1) doar liber)
             if (rights[1] &&
                 Piece.isEmpty(board.getSquare(3)) &&
                 Piece.isEmpty(board.getSquare(2)) &&
-                Piece.isEmpty(board.getSquare(1))) {
+                Piece.isEmpty(board.getSquare(1)) &&
+                !isSquareAttacked(board, 3, opp) &&
+                !isSquareAttacked(board, 2, opp)) {
                 moves.add(new Move(sq, 2, Move.FLAG_CASTLING));
             }
         }
@@ -206,14 +216,18 @@ public class MoveGenerator {
             // Rocada mica neagra (e8-g8)
             if (rights[2] &&
                 Piece.isEmpty(board.getSquare(61)) &&
-                Piece.isEmpty(board.getSquare(62))) {
+                Piece.isEmpty(board.getSquare(62)) &&
+                !isSquareAttacked(board, 61, opp) &&
+                !isSquareAttacked(board, 62, opp)) {
                 moves.add(new Move(sq, 62, Move.FLAG_CASTLING));
             }
             // Rocada mare neagra (e8-c8)
             if (rights[3] &&
                 Piece.isEmpty(board.getSquare(59)) &&
                 Piece.isEmpty(board.getSquare(58)) &&
-                Piece.isEmpty(board.getSquare(57))) {
+                Piece.isEmpty(board.getSquare(57)) &&
+                !isSquareAttacked(board, 59, opp) &&
+                !isSquareAttacked(board, 58, opp)) {
                 moves.add(new Move(sq, 58, Move.FLAG_CASTLING));
             }
         }
@@ -221,5 +235,111 @@ public class MoveGenerator {
 
     private boolean isValidSquare(int sq) {
         return sq >= 0 && sq < 64;
+    }
+
+    // -------------------------------------------------------------------------
+    // DETECTIA SAHULUI
+    // -------------------------------------------------------------------------
+
+    // Returneaza true daca `color` e in sah pe tabla curenta
+    public boolean isInCheck(Board board, int color) {
+        int kingSq = findKing(board, color);
+        if (kingSq == -1) return false; // nu ar trebui sa se intample
+        int attacker = (color == Piece.WHITE) ? Piece.BLACK : Piece.WHITE;
+        return isSquareAttacked(board, kingSq, attacker);
+    }
+
+    // Gaseste patratul regelui de culoarea data
+    public int findKing(Board board, int color) {
+        for (int sq = 0; sq < 64; sq++) {
+            int piece = board.getSquare(sq);
+            if (Piece.type(piece) == Piece.KING && Piece.color(piece) == color) {
+                return sq;
+            }
+        }
+        return -1;
+    }
+
+    // Returneaza true daca patratul `sq` e atacat de `attackerColor`
+    // Logica: plecam din `sq` si "vedem" daca gasim un atacator in fiecare directie
+    public boolean isSquareAttacked(Board board, int sq, int attackerColor) {
+        int col = sq % 8;
+
+        // --- Atacuri de tura / regina pe linii ortogonale ---
+        for (int dir : ROOK_DIRS) {
+            int cur = sq;
+            while (true) {
+                int prevCol = cur % 8;
+                cur += dir;
+                if (!isValidSquare(cur)) break;
+                int curCol = cur % 8;
+                if ((dir == 1 || dir == -1) && Math.abs(prevCol - curCol) != 1) break;
+
+                int piece = board.getSquare(cur);
+                if (!Piece.isEmpty(piece)) {
+                    if (Piece.color(piece) == attackerColor) {
+                        int t = Piece.type(piece);
+                        if (t == Piece.ROOK || t == Piece.QUEEN) return true;
+                    }
+                    break; // blocat de o piesa, indiferent de culoare
+                }
+            }
+        }
+
+        // --- Atacuri de nebun / regina pe diagonale ---
+        for (int dir : BISHOP_DIRS) {
+            int cur = sq;
+            while (true) {
+                int prevCol = cur % 8;
+                cur += dir;
+                if (!isValidSquare(cur)) break;
+                int curCol = cur % 8;
+                if (Math.abs(prevCol - curCol) != 1) break; // wrap-around
+
+                int piece = board.getSquare(cur);
+                if (!Piece.isEmpty(piece)) {
+                    if (Piece.color(piece) == attackerColor) {
+                        int t = Piece.type(piece);
+                        if (t == Piece.BISHOP || t == Piece.QUEEN) return true;
+                    }
+                    break;
+                }
+            }
+        }
+
+        // --- Atacuri de cal ---
+        for (int jump : KNIGHT_JUMPS) {
+            int target = sq + jump;
+            if (!isValidSquare(target)) continue;
+            if (Math.abs(col - target % 8) > 2) continue;
+            int piece = board.getSquare(target);
+            if (!Piece.isEmpty(piece) && Piece.color(piece) == attackerColor
+                    && Piece.type(piece) == Piece.KNIGHT) return true;
+        }
+
+        // --- Atacuri de pion ---
+        // Un pion alb ataca in sus-diagonal, unul negru in jos-diagonal
+        int pawnDir = (attackerColor == Piece.WHITE) ? -1 : 1; // din ce directie vin atacurile
+        for (int dc : new int[]{ -1, 1 }) {
+            int targetRow = sq / 8 + pawnDir;
+            int targetCol = col + dc;
+            if (targetRow < 0 || targetRow > 7 || targetCol < 0 || targetCol > 7) continue;
+            int target = targetRow * 8 + targetCol;
+            int piece = board.getSquare(target);
+            if (!Piece.isEmpty(piece) && Piece.color(piece) == attackerColor
+                    && Piece.type(piece) == Piece.PAWN) return true;
+        }
+
+        // --- Atacuri de rege ---
+        for (int dir : KING_MOVES) {
+            int target = sq + dir;
+            if (!isValidSquare(target)) continue;
+            if (Math.abs(col - target % 8) > 1) continue;
+            int piece = board.getSquare(target);
+            if (!Piece.isEmpty(piece) && Piece.color(piece) == attackerColor
+                    && Piece.type(piece) == Piece.KING) return true;
+        }
+
+        return false;
     }
 }
