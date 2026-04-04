@@ -18,7 +18,7 @@ import java.util.Scanner;
 public class Uci {
 
     private static final String ENGINE_NAME   = "ChessEngine";
-    private static final String ENGINE_AUTHOR = "Student";
+    private static final String ENGINE_AUTHOR = "mchiriac";
 
     private Board  board        = new Board();
     private int    colorToMove  = Piece.WHITE;
@@ -165,7 +165,7 @@ public class Uci {
 
     // Aloca ~1/30 din timpul ramas + increment (formula simpla dar practica)
     private long allocateTime(long remainingMs, long incMs) {
-        return Math.max(remainingMs / 30 + incMs, 50);
+        return Math.max(50 , Math.min(remainingMs / 30 + incMs, 5*1000));
     }
 
     private int opponent(int color) {
