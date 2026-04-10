@@ -19,6 +19,27 @@ public class MoveGenerator {
     // Offseturile regelui (un pas in orice directie)
     private static final int[] KING_MOVES = { 8, -8, 1, -1, 9, 7, -7, -9 };
 
+    // Genereaza doar capturi si promotii — folosit de quiescence search
+    public List<Move> generateCaptures(Board board, int colorToMove) {
+        List<Move> moves = new ArrayList<>();
+
+        for (int sq = 0; sq < 64; sq++) {
+            int piece = board.getSquare(sq);
+            if (Piece.isEmpty(piece) || Piece.color(piece) != colorToMove) continue;
+
+            switch (Piece.type(piece)) {
+                case Piece.PAWN   -> generatePawnCaptures(board, sq, colorToMove, moves);
+                case Piece.KNIGHT -> generateKnightCaptures(board, sq, colorToMove, moves);
+                case Piece.BISHOP -> generateSlidingCaptures(board, sq, colorToMove, BISHOP_DIRS, moves);
+                case Piece.ROOK   -> generateSlidingCaptures(board, sq, colorToMove, ROOK_DIRS, moves);
+                case Piece.QUEEN  -> generateSlidingCaptures(board, sq, colorToMove, QUEEN_DIRS, moves);
+                case Piece.KING   -> generateKingCaptures(board, sq, colorToMove, moves);
+            }
+        }
+
+        return moves;
+    }
+
     public List<Move> generateMoves(Board board, int colorToMove) {
         List<Move> moves = new ArrayList<>();
 
@@ -37,6 +58,90 @@ public class MoveGenerator {
         }
 
         return moves;
+    }
+
+    // -------------------------------------------------------------------------
+    // Metode helper — doar capturi (pentru quiescence search)
+    // -------------------------------------------------------------------------
+
+    private void generatePawnCaptures(Board board, int sq, int color, List<Move> moves) {
+        int opponent = (color == Piece.WHITE) ? Piece.BLACK : Piece.WHITE;
+        int row      = sq / 8;
+        int col      = sq % 8;
+        int promoRow = (color == Piece.WHITE) ? 6 : 1;
+        int targetRow = (color == Piece.WHITE) ? row + 1 : row - 1;
+
+        for (int dc : new int[]{ -1, 1 }) {
+            int targetCol = col + dc;
+            if (targetCol < 0 || targetCol > 7) continue;
+            int targetSq = targetRow * 8 + targetCol;
+
+            int target = board.getSquare(targetSq);
+            if (!Piece.isEmpty(target) && Piece.color(target) == opponent) {
+                if (row == promoRow) {
+                    addPromotions(sq, targetSq, moves);
+                } else {
+                    moves.add(new Move(sq, targetSq));
+                }
+            }
+
+            if (targetSq == board.getEnPassantSquare()) {
+                moves.add(new Move(sq, targetSq, Move.FLAG_EN_PASSANT));
+            }
+        }
+
+        // Promotie fara captura (pas simplu) — tot o mutare "zgomotoasa"
+        int dir     = (color == Piece.WHITE) ? 8 : -8;
+        int oneStep = sq + dir;
+        if (row == promoRow && isValidSquare(oneStep) && Piece.isEmpty(board.getSquare(oneStep))) {
+            addPromotions(sq, oneStep, moves);
+        }
+    }
+
+    private void generateKnightCaptures(Board board, int sq, int color, List<Move> moves) {
+        int col = sq % 8;
+        for (int jump : KNIGHT_JUMPS) {
+            int target = sq + jump;
+            if (!isValidSquare(target)) continue;
+            if (Math.abs(col - target % 8) > 2) continue;
+            int piece = board.getSquare(target);
+            if (!Piece.isEmpty(piece) && Piece.color(piece) != color) {
+                moves.add(new Move(sq, target));
+            }
+        }
+    }
+
+    private void generateSlidingCaptures(Board board, int sq, int color, int[] dirs, List<Move> moves) {
+        for (int dir : dirs) {
+            int current = sq;
+            while (true) {
+                int prevCol = current % 8;
+                current += dir;
+                if (!isValidSquare(current)) break;
+                int curCol = current % 8;
+                if (Math.abs(prevCol - curCol) > 1 &&
+                    (dir == 1 || dir == -1 || dir == 9 || dir == -9 || dir == 7 || dir == -7)) break;
+
+                int piece = board.getSquare(current);
+                if (!Piece.isEmpty(piece)) {
+                    if (Piece.color(piece) != color) moves.add(new Move(sq, current));
+                    break; // oprim in orice caz — e blocat
+                }
+            }
+        }
+    }
+
+    private void generateKingCaptures(Board board, int sq, int color, List<Move> moves) {
+        int col = sq % 8;
+        for (int dir : KING_MOVES) {
+            int target = sq + dir;
+            if (!isValidSquare(target)) continue;
+            if (Math.abs(col - target % 8) > 1) continue;
+            int piece = board.getSquare(target);
+            if (!Piece.isEmpty(piece) && Piece.color(piece) != color) {
+                moves.add(new Move(sq, target));
+            }
+        }
     }
 
     // -------------------------------------------------------------------------

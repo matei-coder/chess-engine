@@ -91,7 +91,7 @@ public class Search {
         nodesSearched++;
 
         if (depth == 0) {
-            return evaluator.evaluate(board, color);
+            return quiescence(board, color, alpha, beta);
         }
 
         List<Move> moves = generator.generateMoves(board, color);
@@ -133,6 +133,53 @@ public class Search {
         }
 
         return bestScore;
+    }
+
+    // -------------------------------------------------------------------------
+    // Quiescence Search
+    //
+    // Apelat la depth=0 in loc de evaluate() direct.
+    // Continua sa exploreze doar capturi pana pozitia devine "linistita".
+    // Previne horizon effect: engineul nu mai crede ca e bine daca tocmai
+    // urmeaza sa piarda o piesa.
+    // -------------------------------------------------------------------------
+    private int quiescence(Board board, int color, int alpha, int beta) {
+        if ((nodesSearched & 2047) == 0 && timeLimit != Long.MAX_VALUE) {
+            if (System.currentTimeMillis() - startTime >= timeLimit) timeUp = true;
+        }
+        if (timeUp) return 0;
+
+        nodesSearched++;
+
+        // Stand-pat: evaluam pozitia fara sa facem nicio mutare.
+        // Presupunem ca jucatorul poate alege sa nu captureze nimic —
+        // daca evaluarea statica e deja mai buna decat beta, ne oprim.
+        int standPat = evaluator.evaluate(board, color);
+        if (standPat >= beta) return beta;
+        if (standPat > alpha) alpha = standPat;
+
+        int opponent = (color == Piece.WHITE) ? Piece.BLACK : Piece.WHITE;
+
+        List<Move> captures = generator.generateCaptures(board, color);
+        captures.sort((a, b) -> scoreMove(board, b) - scoreMove(board, a));
+
+        for (Move move : captures) {
+            GameState state = board.makeMove(move);
+            if (generator.isInCheck(board, color)) {
+                board.unmakeMove(move, state);
+                continue;
+            }
+
+            int score = -quiescence(board, opponent, -beta, -alpha);
+            board.unmakeMove(move, state);
+
+            if (timeUp) return 0;
+
+            if (score >= beta) return beta;  // beta cutoff
+            if (score > alpha) alpha = score;
+        }
+
+        return alpha;
     }
 
     // -------------------------------------------------------------------------
