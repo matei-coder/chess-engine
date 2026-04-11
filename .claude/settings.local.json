@@ -10,7 +10,8 @@
       "Bash(javac -d out src/chess/*.java)",
       "Bash(/usr/libexec/java_home)",
       "Bash(export JAVA_HOME=$\\(/usr/libexec/java_home 2>/dev/null || echo \"\"\\))",
-      "Read(//Library/Java/JavaVirtualMachines/**)"
+      "Read(//Library/Java/JavaVirtualMachines/**)",
+      "Bash(pip3 install:*)"
     ]
   }
 }

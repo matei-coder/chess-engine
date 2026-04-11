@@ -1,0 +1,142 @@
+Config:
+token: logger
+url: https://lichess.org
+engine:
+  dir: /Users/mateichiriac/Documents/chess-engine
+  name: run_engine.sh
+  protocol: uci
+  silence_stderr: false
+  uci_options:
+    Threads: 1
+  interpreter: null
+  interpreter_options: []
+  working_dir: /Users/mateichiriac/Documents/chess-engine
+  draw_or_resign:
+    offer_draw_enabled: false
+    offer_draw_for_egtb_zero: true
+    resign_enabled: false
+    resign_for_egtb_minus_two: true
+    resign_moves: 3
+    resign_score: -1000
+    offer_draw_moves: 5
+    offer_draw_score: 0
+    offer_draw_pieces: 10
+  online_moves:
+    max_out_of_book_moves: 10
+    max_retries: 2
+    max_depth: .inf
+    online_egtb:
+      enabled: false
+      source: lichess
+      min_time: 20
+      max_time: 10800
+      max_pieces: 7
+      move_quality: best
+    chessdb_book:
+      enabled: false
+      min_time: 20
+      max_time: 10800
+      move_quality: good
+      min_depth: 20
+    lichess_cloud_analysis:
+      enabled: false
+      min_time: 20
+      max_time: 10800
+      move_quality: best
+      min_depth: 20
+      min_knodes: 0
+      max_score_difference: 50
+    lichess_opening_explorer:
+      enabled: false
+      min_time: 20
+      max_time: 10800
+      source: masters
+      player_name: ''
+      sort: winrate
+      min_games: 10
+  lichess_bot_tbs:
+    syzygy:
+      enabled: false
+      max_pieces: 7
+      move_quality: best
+    gaviota:
+      enabled: false
+      max_pieces: 5
+      move_quality: best
+      min_dtm_to_consider_as_wdl_1: 120
+  polyglot:
+    enabled: false
+    max_depth: 8
+    selection: weighted_random
+    min_weight: 1
+    normalization: none
+  ponder: false
+  uci_ponder: false
+abort_time: 20
+move_overhead: 500
+online_moves:
+  sources: []
+challenge:
+  concurrency: 1
+  sort_by: best
+  accept_bot: true
+  only_bot: false
+  min_increment: 0
+  max_increment: 180
+  min_base: 0
+  max_base: 3600
+  variants:
+  - standard
+  time_controls:
+  - bullet
+  - blitz
+  - rapid
+  modes:
+  - casual
+  - rated
+  preference: none
+  max_days: .inf
+  min_days: 1
+  block_list: []
+  online_block_list: []
+  allow_list: []
+  min_rating: 0
+  max_rating: 4000
+  rating_difference: null
+  max_simultaneous_games_per_user: 5
+quit_after_all_games_finish: false
+rate_limiting_delay: 0
+pgn_directory: null
+pgn_file_grouping: game
+max_takebacks_accepted: 0
+correspondence:
+  checkin_period: 600
+  move_time: 60
+  disconnect_time: 300
+  ponder: false
+  uci_ponder: false
+matchmaking:
+  challenge_timeout: 30
+  block_list: []
+  online_block_list: []
+  include_challenge_block_list: false
+  challenge_filter: none
+  allow_matchmaking: false
+  challenge_initial_time:
+  - null
+  challenge_increment:
+  - null
+  challenge_days:
+  - null
+  opponent_min_rating: 600
+  opponent_max_rating: 4000
+  rating_preference: none
+  challenge_variant: random
+  challenge_mode: random
+  overrides: {}
+greeting:
+  hello: ''
+  hello_spectators: ''
+  goodbye: ''
+  goodbye_spectators: ''
+====================
