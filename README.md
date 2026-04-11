@@ -1,3 +1,8 @@
+
+source /Users/mateichiriac/Documents/chess-engine/.env
+python3 ~/lichess-bot/lichess-bot.py --config /Users/mateichiriac/Documents/chess-engine/lichess-bot-config.yml
+
+
 # Chess Engine
 
 A chess engine written in Java, capable of playing via a console interface or over the Lichess platform using the UCI protocol.
