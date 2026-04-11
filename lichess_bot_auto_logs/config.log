@@ -76,6 +76,29 @@ abort_time: 20
 move_overhead: 500
 online_moves:
   sources: []
+matchmaking:
+  allow_matchmaking: true
+  challenge_timeout: 30
+  challenge_initial_time:
+  - 60
+  - 180
+  - 300
+  challenge_increment:
+  - 0
+  - 1
+  - 2
+  opponent_min_rating: 800
+  opponent_max_rating: 3000
+  rating_preference: none
+  challenge_variant: standard
+  challenge_mode: rated
+  block_list: []
+  online_block_list: []
+  include_challenge_block_list: false
+  challenge_filter: none
+  challenge_days:
+  - null
+  overrides: {}
 challenge:
   concurrency: 1
   sort_by: best
@@ -115,25 +138,6 @@ correspondence:
   disconnect_time: 300
   ponder: false
   uci_ponder: false
-matchmaking:
-  challenge_timeout: 30
-  block_list: []
-  online_block_list: []
-  include_challenge_block_list: false
-  challenge_filter: none
-  allow_matchmaking: false
-  challenge_initial_time:
-  - null
-  challenge_increment:
-  - null
-  challenge_days:
-  - null
-  opponent_min_rating: 600
-  opponent_max_rating: 4000
-  rating_preference: none
-  challenge_variant: random
-  challenge_mode: random
-  overrides: {}
 greeting:
   hello: ''
   hello_spectators: ''

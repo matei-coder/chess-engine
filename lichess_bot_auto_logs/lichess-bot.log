@@ -225,3 +225,1053 @@ backoff==2.2.1
 2026-04-11 13:59:19,948 urllib3.connectionpool (connectionpool.py:544) DEBUG https://lichess.org:443 "GET /api/account/playing HTTP/1.1" 200 17
 2026-04-11 13:59:19,950 lib.blocklist (blocklist.py:41) INFO Refreshing 0 online blocklists
 2026-04-11 13:59:19,950 lib.blocklist (blocklist.py:41) INFO Refreshing 0 online blocklists
+2026-04-11 14:17:02,655 lib.lichess_bot (lichess_bot.py:1198) INFO 
+    .   _/|
+    .  // o\
+    .  || ._)  lichess-bot 2026.4.3.1 on Darwin 25.4.0
+    .  //__\
+    .  )___(   Play on Lichess with a bot
+    
+2026-04-11 14:17:02,660 lib.config (config.py:282) DEBUG Config:
+token: logger
+url: https://lichess.org
+engine:
+  dir: /Users/mateichiriac/Documents/chess-engine
+  name: run_engine.sh
+  protocol: uci
+  silence_stderr: false
+  uci_options:
+    Threads: 1
+abort_time: 20
+move_overhead: 500
+online_moves:
+  sources: []
+matchmaking:
+  allow_matchmaking: true
+  challenge_timeout: 30
+  challenge_initial_time:
+  - 60
+  - 180
+  - 300
+  challenge_increment:
+  - 0
+  - 1
+  - 2
+  opponent_min_rating: 800
+  opponent_max_rating: 3000
+  rating_preference: none
+  challenge_variant: standard
+  challenge_mode: rated
+challenge:
+  concurrency: 1
+  sort_by: best
+  accept_bot: true
+  only_bot: false
+  min_increment: 0
+  max_increment: 180
+  min_base: 0
+  max_base: 3600
+  variants:
+  - standard
+  time_controls:
+  - bullet
+  - blitz
+  - rapid
+  modes:
+  - casual
+  - rated
+
+2026-04-11 14:17:02,660 lib.config (config.py:283) DEBUG ====================
+2026-04-11 14:17:02,662 lib.config (config.py:282) DEBUG Config:
+token: logger
+url: https://lichess.org
+engine:
+  dir: /Users/mateichiriac/Documents/chess-engine
+  name: run_engine.sh
+  protocol: uci
+  silence_stderr: false
+  uci_options:
+    Threads: 1
+  interpreter: null
+  interpreter_options: []
+  working_dir: /Users/mateichiriac/Documents/chess-engine
+  draw_or_resign:
+    offer_draw_enabled: false
+    offer_draw_for_egtb_zero: true
+    resign_enabled: false
+    resign_for_egtb_minus_two: true
+    resign_moves: 3
+    resign_score: -1000
+    offer_draw_moves: 5
+    offer_draw_score: 0
+    offer_draw_pieces: 10
+  online_moves:
+    max_out_of_book_moves: 10
+    max_retries: 2
+    max_depth: .inf
+    online_egtb:
+      enabled: false
+      source: lichess
+      min_time: 20
+      max_time: 10800
+      max_pieces: 7
+      move_quality: best
+    chessdb_book:
+      enabled: false
+      min_time: 20
+      max_time: 10800
+      move_quality: good
+      min_depth: 20
+    lichess_cloud_analysis:
+      enabled: false
+      min_time: 20
+      max_time: 10800
+      move_quality: best
+      min_depth: 20
+      min_knodes: 0
+      max_score_difference: 50
+    lichess_opening_explorer:
+      enabled: false
+      min_time: 20
+      max_time: 10800
+      source: masters
+      player_name: ''
+      sort: winrate
+      min_games: 10
+  lichess_bot_tbs:
+    syzygy:
+      enabled: false
+      max_pieces: 7
+      move_quality: best
+    gaviota:
+      enabled: false
+      max_pieces: 5
+      move_quality: best
+      min_dtm_to_consider_as_wdl_1: 120
+  polyglot:
+    enabled: false
+    max_depth: 8
+    selection: weighted_random
+    min_weight: 1
+    normalization: none
+  ponder: false
+  uci_ponder: false
+abort_time: 20
+move_overhead: 500
+online_moves:
+  sources: []
+matchmaking:
+  allow_matchmaking: true
+  challenge_timeout: 30
+  challenge_initial_time:
+  - 60
+  - 180
+  - 300
+  challenge_increment:
+  - 0
+  - 1
+  - 2
+  opponent_min_rating: 800
+  opponent_max_rating: 3000
+  rating_preference: none
+  challenge_variant: standard
+  challenge_mode: rated
+  block_list: []
+  online_block_list: []
+  include_challenge_block_list: false
+  challenge_filter: none
+  challenge_days:
+  - null
+  overrides: {}
+challenge:
+  concurrency: 1
+  sort_by: best
+  accept_bot: true
+  only_bot: false
+  min_increment: 0
+  max_increment: 180
+  min_base: 0
+  max_base: 3600
+  variants:
+  - standard
+  time_controls:
+  - bullet
+  - blitz
+  - rapid
+  modes:
+  - casual
+  - rated
+  preference: none
+  max_days: .inf
+  min_days: 1
+  block_list: []
+  online_block_list: []
+  allow_list: []
+  min_rating: 0
+  max_rating: 4000
+  rating_difference: null
+  max_simultaneous_games_per_user: 5
+quit_after_all_games_finish: false
+rate_limiting_delay: 0
+pgn_directory: null
+pgn_file_grouping: game
+max_takebacks_accepted: 0
+correspondence:
+  checkin_period: 600
+  move_time: 60
+  disconnect_time: 300
+  ponder: false
+  uci_ponder: false
+greeting:
+  hello: ''
+  hello_spectators: ''
+  goodbye: ''
+  goodbye_spectators: ''
+
+2026-04-11 14:17:02,662 lib.config (config.py:283) DEBUG ====================
+2026-04-11 14:17:02,665 lib.lichess_bot (lichess_bot.py:1204) INFO Checking engine configuration ...
+2026-04-11 14:17:02,666 lib.engine_wrapper (engine_wrapper.py:70) DEBUG Starting engine: ['/Users/mateichiriac/Documents/chess-engine/run_engine.sh']
+2026-04-11 14:17:02,666 asyncio (selector_events.py:64) DEBUG Using selector: KqueueSelector
+2026-04-11 14:17:02,669 chess.engine (engine.py:928) DEBUG <UciProtocol (pid=8663)>: Connection made
+2026-04-11 14:17:02,669 chess.engine (engine.py:950) DEBUG <UciProtocol (pid=8663)>: << uci
+2026-04-11 14:17:02,712 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8663)>: >> id name ChessEngine
+2026-04-11 14:17:02,712 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8663)>: >> id author Student
+2026-04-11 14:17:02,712 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8663)>: >> option name Hash type spin default 16 min 1 max 128
+2026-04-11 14:17:02,712 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8663)>: >> option name Threads type spin default 1 min 1 max 1
+2026-04-11 14:17:02,712 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8663)>: >> option name Move Overhead type spin default 30 min 0 max 5000
+2026-04-11 14:17:02,712 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8663)>: >> uciok
+2026-04-11 14:17:02,712 chess.engine (engine.py:950) DEBUG <UciProtocol (pid=8663)>: << isready
+2026-04-11 14:17:02,713 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8663)>: >> readyok
+2026-04-11 14:17:02,713 chess.engine (engine.py:950) DEBUG <UciProtocol (pid=8663)>: << quit
+2026-04-11 14:17:02,714 chess.engine (engine.py:947) DEBUG <UciProtocol (pid=8663)>: Process exited
+2026-04-11 14:17:02,714 chess.engine (engine.py:934) DEBUG <UciProtocol (pid=8663)>: Connection lost (exit code: 0, error: None)
+2026-04-11 14:17:02,714 lib.lichess_bot (lichess_bot.py:1207) INFO Engine configuration OK
+2026-04-11 14:17:02,715 lib.lichess_bot (lichess_bot.py:1177) DEBUG Python version: 3.14.4.final.0
+2026-04-11 14:17:02,719 lib.lichess_bot (lichess_bot.py:1183) DEBUG Installed libraries:
+requests==2.33.1
+certifi==2026.2.25
+wheel==0.46.3
+idna==3.11
+rich==14.3.3
+markdown-it-py==4.0.0
+Pygments==2.20.0
+mdurl==0.1.2
+PyYAML==6.0.3
+urllib3==2.6.3
+charset-normalizer==3.4.7
+pip==26.0.1
+chess==1.11.2
+backoff==2.2.1
+git-filter-repo==2.47.0
+
+
+2026-04-11 14:17:02,720 urllib3.connectionpool (connectionpool.py:1049) DEBUG Starting new HTTPS connection (1): lichess.org:443
+2026-04-11 14:17:03,480 urllib3.connectionpool (connectionpool.py:544) DEBUG https://lichess.org:443 "POST /api/token/test HTTP/1.1" 200 None
+2026-04-11 14:17:03,527 urllib3.connectionpool (connectionpool.py:544) DEBUG https://lichess.org:443 "GET /api/account HTTP/1.1" 200 None
+2026-04-11 14:17:03,528 lib.lichess_bot (lichess_bot.py:1217) INFO Welcome mateichiriacbot!
+2026-04-11 14:17:03,529 lib.lichess_bot (lichess_bot.py:259) INFO You're now connected to https://lichess.org and awaiting challenges.
+2026-04-11 14:17:03,766 urllib3.connectionpool (connectionpool.py:544) DEBUG https://lichess.org:443 "GET /api/account/playing HTTP/1.1" 200 17
+2026-04-11 14:17:03,767 lib.blocklist (blocklist.py:41) INFO Refreshing 0 online blocklists
+2026-04-11 14:17:03,767 lib.matchmaking (matchmaking.py:265) INFO Next challenge will be created after Sat Apr 11 14:47:03 2026
+2026-04-11 14:17:03,767 lib.blocklist (blocklist.py:41) INFO Refreshing 0 online blocklists
+2026-04-11 14:17:04,539 lib.lichess_bot (lichess_bot.py:458) DEBUG Event: {'type': 'terminated', 'error': 'Traceback (most recent call last):\n  File "/Users/mateichiriac/lichess-bot/lib/lichess_bot.py", line 120, in watch_control_stream\n    with li.get_event_stream() as response:\n         ~~~~~~~~~~~~~~~~~~~^^\n  File "/Users/mateichiriac/lichess-bot/lib/lichess.py", line 380, in get_event_stream\n    return self.api_get("stream_event", stream=True, timeout=15)\n           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/opt/homebrew/lib/python3.14/site-packages/backoff/_sync.py", line 105, in retry\n    ret = target(*args, **kwargs)\n  File "/Users/mateichiriac/lichess-bot/lib/lichess.py", line 194, in api_get\n    response.raise_for_status()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File "/opt/homebrew/lib/python3.14/site-packages/requests/models.py", line 1028, in raise_for_status\n    raise HTTPError(http_error_msg, response=self)\nrequests.exceptions.HTTPError: 429 Client Error: Too Many Requests for url: https://lichess.org/api/stream/event\n'}
+2026-04-11 14:17:04,540 lib.lichess_bot (lichess_bot.py:383) DEBUG Terminating exception:
+Traceback (most recent call last):
+  File "/Users/mateichiriac/lichess-bot/lib/lichess_bot.py", line 120, in watch_control_stream
+    with li.get_event_stream() as response:
+         ~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mateichiriac/lichess-bot/lib/lichess.py", line 380, in get_event_stream
+    return self.api_get("stream_event", stream=True, timeout=15)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.14/site-packages/backoff/_sync.py", line 105, in retry
+    ret = target(*args, **kwargs)
+  File "/Users/mateichiriac/lichess-bot/lib/lichess.py", line 194, in api_get
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/lib/python3.14/site-packages/requests/models.py", line 1028, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 429 Client Error: Too Many Requests for url: https://lichess.org/api/stream/event
+
+2026-04-11 14:17:15,615 lib.lichess_bot (lichess_bot.py:1198) INFO 
+    .   _/|
+    .  // o\
+    .  || ._)  lichess-bot 2026.4.3.1 on Darwin 25.4.0
+    .  //__\
+    .  )___(   Play on Lichess with a bot
+    
+2026-04-11 14:17:15,622 lib.config (config.py:282) DEBUG Config:
+token: logger
+url: https://lichess.org
+engine:
+  dir: /Users/mateichiriac/Documents/chess-engine
+  name: run_engine.sh
+  protocol: uci
+  silence_stderr: false
+  uci_options:
+    Threads: 1
+abort_time: 20
+move_overhead: 500
+online_moves:
+  sources: []
+matchmaking:
+  allow_matchmaking: true
+  challenge_timeout: 30
+  challenge_initial_time:
+  - 60
+  - 180
+  - 300
+  challenge_increment:
+  - 0
+  - 1
+  - 2
+  opponent_min_rating: 800
+  opponent_max_rating: 3000
+  rating_preference: none
+  challenge_variant: standard
+  challenge_mode: rated
+challenge:
+  concurrency: 1
+  sort_by: best
+  accept_bot: true
+  only_bot: false
+  min_increment: 0
+  max_increment: 180
+  min_base: 0
+  max_base: 3600
+  variants:
+  - standard
+  time_controls:
+  - bullet
+  - blitz
+  - rapid
+  modes:
+  - casual
+  - rated
+
+2026-04-11 14:17:15,622 lib.config (config.py:283) DEBUG ====================
+2026-04-11 14:17:15,626 lib.config (config.py:282) DEBUG Config:
+token: logger
+url: https://lichess.org
+engine:
+  dir: /Users/mateichiriac/Documents/chess-engine
+  name: run_engine.sh
+  protocol: uci
+  silence_stderr: false
+  uci_options:
+    Threads: 1
+  interpreter: null
+  interpreter_options: []
+  working_dir: /Users/mateichiriac/Documents/chess-engine
+  draw_or_resign:
+    offer_draw_enabled: false
+    offer_draw_for_egtb_zero: true
+    resign_enabled: false
+    resign_for_egtb_minus_two: true
+    resign_moves: 3
+    resign_score: -1000
+    offer_draw_moves: 5
+    offer_draw_score: 0
+    offer_draw_pieces: 10
+  online_moves:
+    max_out_of_book_moves: 10
+    max_retries: 2
+    max_depth: .inf
+    online_egtb:
+      enabled: false
+      source: lichess
+      min_time: 20
+      max_time: 10800
+      max_pieces: 7
+      move_quality: best
+    chessdb_book:
+      enabled: false
+      min_time: 20
+      max_time: 10800
+      move_quality: good
+      min_depth: 20
+    lichess_cloud_analysis:
+      enabled: false
+      min_time: 20
+      max_time: 10800
+      move_quality: best
+      min_depth: 20
+      min_knodes: 0
+      max_score_difference: 50
+    lichess_opening_explorer:
+      enabled: false
+      min_time: 20
+      max_time: 10800
+      source: masters
+      player_name: ''
+      sort: winrate
+      min_games: 10
+  lichess_bot_tbs:
+    syzygy:
+      enabled: false
+      max_pieces: 7
+      move_quality: best
+    gaviota:
+      enabled: false
+      max_pieces: 5
+      move_quality: best
+      min_dtm_to_consider_as_wdl_1: 120
+  polyglot:
+    enabled: false
+    max_depth: 8
+    selection: weighted_random
+    min_weight: 1
+    normalization: none
+  ponder: false
+  uci_ponder: false
+abort_time: 20
+move_overhead: 500
+online_moves:
+  sources: []
+matchmaking:
+  allow_matchmaking: true
+  challenge_timeout: 30
+  challenge_initial_time:
+  - 60
+  - 180
+  - 300
+  challenge_increment:
+  - 0
+  - 1
+  - 2
+  opponent_min_rating: 800
+  opponent_max_rating: 3000
+  rating_preference: none
+  challenge_variant: standard
+  challenge_mode: rated
+  block_list: []
+  online_block_list: []
+  include_challenge_block_list: false
+  challenge_filter: none
+  challenge_days:
+  - null
+  overrides: {}
+challenge:
+  concurrency: 1
+  sort_by: best
+  accept_bot: true
+  only_bot: false
+  min_increment: 0
+  max_increment: 180
+  min_base: 0
+  max_base: 3600
+  variants:
+  - standard
+  time_controls:
+  - bullet
+  - blitz
+  - rapid
+  modes:
+  - casual
+  - rated
+  preference: none
+  max_days: .inf
+  min_days: 1
+  block_list: []
+  online_block_list: []
+  allow_list: []
+  min_rating: 0
+  max_rating: 4000
+  rating_difference: null
+  max_simultaneous_games_per_user: 5
+quit_after_all_games_finish: false
+rate_limiting_delay: 0
+pgn_directory: null
+pgn_file_grouping: game
+max_takebacks_accepted: 0
+correspondence:
+  checkin_period: 600
+  move_time: 60
+  disconnect_time: 300
+  ponder: false
+  uci_ponder: false
+greeting:
+  hello: ''
+  hello_spectators: ''
+  goodbye: ''
+  goodbye_spectators: ''
+
+2026-04-11 14:17:15,626 lib.config (config.py:283) DEBUG ====================
+2026-04-11 14:17:15,630 lib.lichess_bot (lichess_bot.py:1204) INFO Checking engine configuration ...
+2026-04-11 14:17:15,631 lib.engine_wrapper (engine_wrapper.py:70) DEBUG Starting engine: ['/Users/mateichiriac/Documents/chess-engine/run_engine.sh']
+2026-04-11 14:17:15,632 asyncio (selector_events.py:64) DEBUG Using selector: KqueueSelector
+2026-04-11 14:17:15,636 chess.engine (engine.py:928) DEBUG <UciProtocol (pid=8752)>: Connection made
+2026-04-11 14:17:15,637 chess.engine (engine.py:950) DEBUG <UciProtocol (pid=8752)>: << uci
+2026-04-11 14:17:15,689 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8752)>: >> id name ChessEngine
+2026-04-11 14:17:15,689 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8752)>: >> id author Student
+2026-04-11 14:17:15,689 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8752)>: >> option name Hash type spin default 16 min 1 max 128
+2026-04-11 14:17:15,689 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8752)>: >> option name Threads type spin default 1 min 1 max 1
+2026-04-11 14:17:15,689 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8752)>: >> option name Move Overhead type spin default 30 min 0 max 5000
+2026-04-11 14:17:15,689 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8752)>: >> uciok
+2026-04-11 14:17:15,689 chess.engine (engine.py:950) DEBUG <UciProtocol (pid=8752)>: << isready
+2026-04-11 14:17:15,690 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8752)>: >> readyok
+2026-04-11 14:17:15,690 chess.engine (engine.py:950) DEBUG <UciProtocol (pid=8752)>: << quit
+2026-04-11 14:17:15,691 chess.engine (engine.py:947) DEBUG <UciProtocol (pid=8752)>: Process exited
+2026-04-11 14:17:15,691 chess.engine (engine.py:934) DEBUG <UciProtocol (pid=8752)>: Connection lost (exit code: 0, error: None)
+2026-04-11 14:17:15,692 lib.lichess_bot (lichess_bot.py:1207) INFO Engine configuration OK
+2026-04-11 14:17:15,692 lib.lichess_bot (lichess_bot.py:1177) DEBUG Python version: 3.14.4.final.0
+2026-04-11 14:17:15,696 lib.lichess_bot (lichess_bot.py:1183) DEBUG Installed libraries:
+requests==2.33.1
+certifi==2026.2.25
+wheel==0.46.3
+idna==3.11
+rich==14.3.3
+markdown-it-py==4.0.0
+Pygments==2.20.0
+mdurl==0.1.2
+PyYAML==6.0.3
+urllib3==2.6.3
+charset-normalizer==3.4.7
+pip==26.0.1
+chess==1.11.2
+backoff==2.2.1
+git-filter-repo==2.47.0
+
+
+2026-04-11 14:17:15,697 urllib3.connectionpool (connectionpool.py:1049) DEBUG Starting new HTTPS connection (1): lichess.org:443
+2026-04-11 14:17:15,853 urllib3.connectionpool (connectionpool.py:544) DEBUG https://lichess.org:443 "POST /api/token/test HTTP/1.1" 200 None
+2026-04-11 14:17:15,899 urllib3.connectionpool (connectionpool.py:544) DEBUG https://lichess.org:443 "GET /api/account HTTP/1.1" 200 None
+2026-04-11 14:17:15,900 lib.lichess_bot (lichess_bot.py:1217) INFO Welcome mateichiriacbot!
+2026-04-11 14:17:15,901 lib.lichess_bot (lichess_bot.py:259) INFO You're now connected to https://lichess.org and awaiting challenges.
+2026-04-11 14:17:16,109 urllib3.connectionpool (connectionpool.py:544) DEBUG https://lichess.org:443 "GET /api/account/playing HTTP/1.1" 200 17
+2026-04-11 14:17:16,111 lib.blocklist (blocklist.py:41) INFO Refreshing 0 online blocklists
+2026-04-11 14:17:16,111 lib.matchmaking (matchmaking.py:265) INFO Next challenge will be created after Sat Apr 11 14:47:16 2026
+2026-04-11 14:17:16,111 lib.blocklist (blocklist.py:41) INFO Refreshing 0 online blocklists
+2026-04-11 14:17:16,673 lib.lichess_bot (lichess_bot.py:458) DEBUG Event: {'type': 'terminated', 'error': 'Traceback (most recent call last):\n  File "/Users/mateichiriac/lichess-bot/lib/lichess_bot.py", line 120, in watch_control_stream\n    with li.get_event_stream() as response:\n         ~~~~~~~~~~~~~~~~~~~^^\n  File "/Users/mateichiriac/lichess-bot/lib/lichess.py", line 380, in get_event_stream\n    return self.api_get("stream_event", stream=True, timeout=15)\n           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/opt/homebrew/lib/python3.14/site-packages/backoff/_sync.py", line 105, in retry\n    ret = target(*args, **kwargs)\n  File "/Users/mateichiriac/lichess-bot/lib/lichess.py", line 194, in api_get\n    response.raise_for_status()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File "/opt/homebrew/lib/python3.14/site-packages/requests/models.py", line 1028, in raise_for_status\n    raise HTTPError(http_error_msg, response=self)\nrequests.exceptions.HTTPError: 429 Client Error: Too Many Requests for url: https://lichess.org/api/stream/event\n'}
+2026-04-11 14:17:16,674 lib.lichess_bot (lichess_bot.py:383) DEBUG Terminating exception:
+Traceback (most recent call last):
+  File "/Users/mateichiriac/lichess-bot/lib/lichess_bot.py", line 120, in watch_control_stream
+    with li.get_event_stream() as response:
+         ~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mateichiriac/lichess-bot/lib/lichess.py", line 380, in get_event_stream
+    return self.api_get("stream_event", stream=True, timeout=15)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.14/site-packages/backoff/_sync.py", line 105, in retry
+    ret = target(*args, **kwargs)
+  File "/Users/mateichiriac/lichess-bot/lib/lichess.py", line 194, in api_get
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/lib/python3.14/site-packages/requests/models.py", line 1028, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 429 Client Error: Too Many Requests for url: https://lichess.org/api/stream/event
+
+2026-04-11 14:17:27,750 lib.lichess_bot (lichess_bot.py:1198) INFO 
+    .   _/|
+    .  // o\
+    .  || ._)  lichess-bot 2026.4.3.1 on Darwin 25.4.0
+    .  //__\
+    .  )___(   Play on Lichess with a bot
+    
+2026-04-11 14:17:27,757 lib.config (config.py:282) DEBUG Config:
+token: logger
+url: https://lichess.org
+engine:
+  dir: /Users/mateichiriac/Documents/chess-engine
+  name: run_engine.sh
+  protocol: uci
+  silence_stderr: false
+  uci_options:
+    Threads: 1
+abort_time: 20
+move_overhead: 500
+online_moves:
+  sources: []
+matchmaking:
+  allow_matchmaking: true
+  challenge_timeout: 30
+  challenge_initial_time:
+  - 60
+  - 180
+  - 300
+  challenge_increment:
+  - 0
+  - 1
+  - 2
+  opponent_min_rating: 800
+  opponent_max_rating: 3000
+  rating_preference: none
+  challenge_variant: standard
+  challenge_mode: rated
+challenge:
+  concurrency: 1
+  sort_by: best
+  accept_bot: true
+  only_bot: false
+  min_increment: 0
+  max_increment: 180
+  min_base: 0
+  max_base: 3600
+  variants:
+  - standard
+  time_controls:
+  - bullet
+  - blitz
+  - rapid
+  modes:
+  - casual
+  - rated
+
+2026-04-11 14:17:27,757 lib.config (config.py:283) DEBUG ====================
+2026-04-11 14:17:27,760 lib.config (config.py:282) DEBUG Config:
+token: logger
+url: https://lichess.org
+engine:
+  dir: /Users/mateichiriac/Documents/chess-engine
+  name: run_engine.sh
+  protocol: uci
+  silence_stderr: false
+  uci_options:
+    Threads: 1
+  interpreter: null
+  interpreter_options: []
+  working_dir: /Users/mateichiriac/Documents/chess-engine
+  draw_or_resign:
+    offer_draw_enabled: false
+    offer_draw_for_egtb_zero: true
+    resign_enabled: false
+    resign_for_egtb_minus_two: true
+    resign_moves: 3
+    resign_score: -1000
+    offer_draw_moves: 5
+    offer_draw_score: 0
+    offer_draw_pieces: 10
+  online_moves:
+    max_out_of_book_moves: 10
+    max_retries: 2
+    max_depth: .inf
+    online_egtb:
+      enabled: false
+      source: lichess
+      min_time: 20
+      max_time: 10800
+      max_pieces: 7
+      move_quality: best
+    chessdb_book:
+      enabled: false
+      min_time: 20
+      max_time: 10800
+      move_quality: good
+      min_depth: 20
+    lichess_cloud_analysis:
+      enabled: false
+      min_time: 20
+      max_time: 10800
+      move_quality: best
+      min_depth: 20
+      min_knodes: 0
+      max_score_difference: 50
+    lichess_opening_explorer:
+      enabled: false
+      min_time: 20
+      max_time: 10800
+      source: masters
+      player_name: ''
+      sort: winrate
+      min_games: 10
+  lichess_bot_tbs:
+    syzygy:
+      enabled: false
+      max_pieces: 7
+      move_quality: best
+    gaviota:
+      enabled: false
+      max_pieces: 5
+      move_quality: best
+      min_dtm_to_consider_as_wdl_1: 120
+  polyglot:
+    enabled: false
+    max_depth: 8
+    selection: weighted_random
+    min_weight: 1
+    normalization: none
+  ponder: false
+  uci_ponder: false
+abort_time: 20
+move_overhead: 500
+online_moves:
+  sources: []
+matchmaking:
+  allow_matchmaking: true
+  challenge_timeout: 30
+  challenge_initial_time:
+  - 60
+  - 180
+  - 300
+  challenge_increment:
+  - 0
+  - 1
+  - 2
+  opponent_min_rating: 800
+  opponent_max_rating: 3000
+  rating_preference: none
+  challenge_variant: standard
+  challenge_mode: rated
+  block_list: []
+  online_block_list: []
+  include_challenge_block_list: false
+  challenge_filter: none
+  challenge_days:
+  - null
+  overrides: {}
+challenge:
+  concurrency: 1
+  sort_by: best
+  accept_bot: true
+  only_bot: false
+  min_increment: 0
+  max_increment: 180
+  min_base: 0
+  max_base: 3600
+  variants:
+  - standard
+  time_controls:
+  - bullet
+  - blitz
+  - rapid
+  modes:
+  - casual
+  - rated
+  preference: none
+  max_days: .inf
+  min_days: 1
+  block_list: []
+  online_block_list: []
+  allow_list: []
+  min_rating: 0
+  max_rating: 4000
+  rating_difference: null
+  max_simultaneous_games_per_user: 5
+quit_after_all_games_finish: false
+rate_limiting_delay: 0
+pgn_directory: null
+pgn_file_grouping: game
+max_takebacks_accepted: 0
+correspondence:
+  checkin_period: 600
+  move_time: 60
+  disconnect_time: 300
+  ponder: false
+  uci_ponder: false
+greeting:
+  hello: ''
+  hello_spectators: ''
+  goodbye: ''
+  goodbye_spectators: ''
+
+2026-04-11 14:17:27,760 lib.config (config.py:283) DEBUG ====================
+2026-04-11 14:17:27,764 lib.lichess_bot (lichess_bot.py:1204) INFO Checking engine configuration ...
+2026-04-11 14:17:27,765 lib.engine_wrapper (engine_wrapper.py:70) DEBUG Starting engine: ['/Users/mateichiriac/Documents/chess-engine/run_engine.sh']
+2026-04-11 14:17:27,765 asyncio (selector_events.py:64) DEBUG Using selector: KqueueSelector
+2026-04-11 14:17:27,770 chess.engine (engine.py:928) DEBUG <UciProtocol (pid=8770)>: Connection made
+2026-04-11 14:17:27,770 chess.engine (engine.py:950) DEBUG <UciProtocol (pid=8770)>: << uci
+2026-04-11 14:17:27,822 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8770)>: >> id name ChessEngine
+2026-04-11 14:17:27,823 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8770)>: >> id author Student
+2026-04-11 14:17:27,823 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8770)>: >> option name Hash type spin default 16 min 1 max 128
+2026-04-11 14:17:27,823 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8770)>: >> option name Threads type spin default 1 min 1 max 1
+2026-04-11 14:17:27,823 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8770)>: >> option name Move Overhead type spin default 30 min 0 max 5000
+2026-04-11 14:17:27,823 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8770)>: >> uciok
+2026-04-11 14:17:27,823 chess.engine (engine.py:950) DEBUG <UciProtocol (pid=8770)>: << isready
+2026-04-11 14:17:27,823 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8770)>: >> readyok
+2026-04-11 14:17:27,823 chess.engine (engine.py:950) DEBUG <UciProtocol (pid=8770)>: << quit
+2026-04-11 14:17:27,825 chess.engine (engine.py:947) DEBUG <UciProtocol (pid=8770)>: Process exited
+2026-04-11 14:17:27,825 chess.engine (engine.py:934) DEBUG <UciProtocol (pid=8770)>: Connection lost (exit code: 0, error: None)
+2026-04-11 14:17:27,825 lib.lichess_bot (lichess_bot.py:1207) INFO Engine configuration OK
+2026-04-11 14:17:27,826 lib.lichess_bot (lichess_bot.py:1177) DEBUG Python version: 3.14.4.final.0
+2026-04-11 14:17:27,830 lib.lichess_bot (lichess_bot.py:1183) DEBUG Installed libraries:
+requests==2.33.1
+certifi==2026.2.25
+wheel==0.46.3
+idna==3.11
+rich==14.3.3
+markdown-it-py==4.0.0
+Pygments==2.20.0
+mdurl==0.1.2
+PyYAML==6.0.3
+urllib3==2.6.3
+charset-normalizer==3.4.7
+pip==26.0.1
+chess==1.11.2
+backoff==2.2.1
+git-filter-repo==2.47.0
+
+
+2026-04-11 14:17:27,830 urllib3.connectionpool (connectionpool.py:1049) DEBUG Starting new HTTPS connection (1): lichess.org:443
+2026-04-11 14:17:27,975 urllib3.connectionpool (connectionpool.py:544) DEBUG https://lichess.org:443 "POST /api/token/test HTTP/1.1" 200 None
+2026-04-11 14:17:28,034 urllib3.connectionpool (connectionpool.py:544) DEBUG https://lichess.org:443 "GET /api/account HTTP/1.1" 200 None
+2026-04-11 14:17:28,035 lib.lichess_bot (lichess_bot.py:1217) INFO Welcome mateichiriacbot!
+2026-04-11 14:17:28,036 lib.lichess_bot (lichess_bot.py:259) INFO You're now connected to https://lichess.org and awaiting challenges.
+2026-04-11 14:17:28,233 urllib3.connectionpool (connectionpool.py:544) DEBUG https://lichess.org:443 "GET /api/account/playing HTTP/1.1" 200 17
+2026-04-11 14:17:28,240 lib.blocklist (blocklist.py:41) INFO Refreshing 0 online blocklists
+2026-04-11 14:17:28,241 lib.matchmaking (matchmaking.py:265) INFO Next challenge will be created after Sat Apr 11 14:47:28 2026
+2026-04-11 14:17:28,241 lib.blocklist (blocklist.py:41) INFO Refreshing 0 online blocklists
+2026-04-11 14:17:28,795 lib.lichess_bot (lichess_bot.py:458) DEBUG Event: {'type': 'terminated', 'error': 'Traceback (most recent call last):\n  File "/Users/mateichiriac/lichess-bot/lib/lichess_bot.py", line 120, in watch_control_stream\n    with li.get_event_stream() as response:\n         ~~~~~~~~~~~~~~~~~~~^^\n  File "/Users/mateichiriac/lichess-bot/lib/lichess.py", line 380, in get_event_stream\n    return self.api_get("stream_event", stream=True, timeout=15)\n           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/opt/homebrew/lib/python3.14/site-packages/backoff/_sync.py", line 105, in retry\n    ret = target(*args, **kwargs)\n  File "/Users/mateichiriac/lichess-bot/lib/lichess.py", line 194, in api_get\n    response.raise_for_status()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File "/opt/homebrew/lib/python3.14/site-packages/requests/models.py", line 1028, in raise_for_status\n    raise HTTPError(http_error_msg, response=self)\nrequests.exceptions.HTTPError: 429 Client Error: Too Many Requests for url: https://lichess.org/api/stream/event\n'}
+2026-04-11 14:17:28,796 lib.lichess_bot (lichess_bot.py:383) DEBUG Terminating exception:
+Traceback (most recent call last):
+  File "/Users/mateichiriac/lichess-bot/lib/lichess_bot.py", line 120, in watch_control_stream
+    with li.get_event_stream() as response:
+         ~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mateichiriac/lichess-bot/lib/lichess.py", line 380, in get_event_stream
+    return self.api_get("stream_event", stream=True, timeout=15)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.14/site-packages/backoff/_sync.py", line 105, in retry
+    ret = target(*args, **kwargs)
+  File "/Users/mateichiriac/lichess-bot/lib/lichess.py", line 194, in api_get
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/lib/python3.14/site-packages/requests/models.py", line 1028, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 429 Client Error: Too Many Requests for url: https://lichess.org/api/stream/event
+
+2026-04-11 14:17:39,879 lib.lichess_bot (lichess_bot.py:1198) INFO 
+    .   _/|
+    .  // o\
+    .  || ._)  lichess-bot 2026.4.3.1 on Darwin 25.4.0
+    .  //__\
+    .  )___(   Play on Lichess with a bot
+    
+2026-04-11 14:17:39,887 lib.config (config.py:282) DEBUG Config:
+token: logger
+url: https://lichess.org
+engine:
+  dir: /Users/mateichiriac/Documents/chess-engine
+  name: run_engine.sh
+  protocol: uci
+  silence_stderr: false
+  uci_options:
+    Threads: 1
+abort_time: 20
+move_overhead: 500
+online_moves:
+  sources: []
+matchmaking:
+  allow_matchmaking: true
+  challenge_timeout: 30
+  challenge_initial_time:
+  - 60
+  - 180
+  - 300
+  challenge_increment:
+  - 0
+  - 1
+  - 2
+  opponent_min_rating: 800
+  opponent_max_rating: 3000
+  rating_preference: none
+  challenge_variant: standard
+  challenge_mode: rated
+challenge:
+  concurrency: 1
+  sort_by: best
+  accept_bot: true
+  only_bot: false
+  min_increment: 0
+  max_increment: 180
+  min_base: 0
+  max_base: 3600
+  variants:
+  - standard
+  time_controls:
+  - bullet
+  - blitz
+  - rapid
+  modes:
+  - casual
+  - rated
+
+2026-04-11 14:17:39,887 lib.config (config.py:283) DEBUG ====================
+2026-04-11 14:17:39,891 lib.config (config.py:282) DEBUG Config:
+token: logger
+url: https://lichess.org
+engine:
+  dir: /Users/mateichiriac/Documents/chess-engine
+  name: run_engine.sh
+  protocol: uci
+  silence_stderr: false
+  uci_options:
+    Threads: 1
+  interpreter: null
+  interpreter_options: []
+  working_dir: /Users/mateichiriac/Documents/chess-engine
+  draw_or_resign:
+    offer_draw_enabled: false
+    offer_draw_for_egtb_zero: true
+    resign_enabled: false
+    resign_for_egtb_minus_two: true
+    resign_moves: 3
+    resign_score: -1000
+    offer_draw_moves: 5
+    offer_draw_score: 0
+    offer_draw_pieces: 10
+  online_moves:
+    max_out_of_book_moves: 10
+    max_retries: 2
+    max_depth: .inf
+    online_egtb:
+      enabled: false
+      source: lichess
+      min_time: 20
+      max_time: 10800
+      max_pieces: 7
+      move_quality: best
+    chessdb_book:
+      enabled: false
+      min_time: 20
+      max_time: 10800
+      move_quality: good
+      min_depth: 20
+    lichess_cloud_analysis:
+      enabled: false
+      min_time: 20
+      max_time: 10800
+      move_quality: best
+      min_depth: 20
+      min_knodes: 0
+      max_score_difference: 50
+    lichess_opening_explorer:
+      enabled: false
+      min_time: 20
+      max_time: 10800
+      source: masters
+      player_name: ''
+      sort: winrate
+      min_games: 10
+  lichess_bot_tbs:
+    syzygy:
+      enabled: false
+      max_pieces: 7
+      move_quality: best
+    gaviota:
+      enabled: false
+      max_pieces: 5
+      move_quality: best
+      min_dtm_to_consider_as_wdl_1: 120
+  polyglot:
+    enabled: false
+    max_depth: 8
+    selection: weighted_random
+    min_weight: 1
+    normalization: none
+  ponder: false
+  uci_ponder: false
+abort_time: 20
+move_overhead: 500
+online_moves:
+  sources: []
+matchmaking:
+  allow_matchmaking: true
+  challenge_timeout: 30
+  challenge_initial_time:
+  - 60
+  - 180
+  - 300
+  challenge_increment:
+  - 0
+  - 1
+  - 2
+  opponent_min_rating: 800
+  opponent_max_rating: 3000
+  rating_preference: none
+  challenge_variant: standard
+  challenge_mode: rated
+  block_list: []
+  online_block_list: []
+  include_challenge_block_list: false
+  challenge_filter: none
+  challenge_days:
+  - null
+  overrides: {}
+challenge:
+  concurrency: 1
+  sort_by: best
+  accept_bot: true
+  only_bot: false
+  min_increment: 0
+  max_increment: 180
+  min_base: 0
+  max_base: 3600
+  variants:
+  - standard
+  time_controls:
+  - bullet
+  - blitz
+  - rapid
+  modes:
+  - casual
+  - rated
+  preference: none
+  max_days: .inf
+  min_days: 1
+  block_list: []
+  online_block_list: []
+  allow_list: []
+  min_rating: 0
+  max_rating: 4000
+  rating_difference: null
+  max_simultaneous_games_per_user: 5
+quit_after_all_games_finish: false
+rate_limiting_delay: 0
+pgn_directory: null
+pgn_file_grouping: game
+max_takebacks_accepted: 0
+correspondence:
+  checkin_period: 600
+  move_time: 60
+  disconnect_time: 300
+  ponder: false
+  uci_ponder: false
+greeting:
+  hello: ''
+  hello_spectators: ''
+  goodbye: ''
+  goodbye_spectators: ''
+
+2026-04-11 14:17:39,891 lib.config (config.py:283) DEBUG ====================
+2026-04-11 14:17:39,894 lib.lichess_bot (lichess_bot.py:1204) INFO Checking engine configuration ...
+2026-04-11 14:17:39,895 lib.engine_wrapper (engine_wrapper.py:70) DEBUG Starting engine: ['/Users/mateichiriac/Documents/chess-engine/run_engine.sh']
+2026-04-11 14:17:39,896 asyncio (selector_events.py:64) DEBUG Using selector: KqueueSelector
+2026-04-11 14:17:39,900 chess.engine (engine.py:928) DEBUG <UciProtocol (pid=8795)>: Connection made
+2026-04-11 14:17:39,901 chess.engine (engine.py:950) DEBUG <UciProtocol (pid=8795)>: << uci
+2026-04-11 14:17:39,955 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8795)>: >> id name ChessEngine
+2026-04-11 14:17:39,955 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8795)>: >> id author Student
+2026-04-11 14:17:39,955 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8795)>: >> option name Hash type spin default 16 min 1 max 128
+2026-04-11 14:17:39,955 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8795)>: >> option name Threads type spin default 1 min 1 max 1
+2026-04-11 14:17:39,955 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8795)>: >> option name Move Overhead type spin default 30 min 0 max 5000
+2026-04-11 14:17:39,955 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8795)>: >> uciok
+2026-04-11 14:17:39,955 chess.engine (engine.py:950) DEBUG <UciProtocol (pid=8795)>: << isready
+2026-04-11 14:17:39,955 chess.engine (engine.py:976) DEBUG <UciProtocol (pid=8795)>: >> readyok
+2026-04-11 14:17:39,956 chess.engine (engine.py:950) DEBUG <UciProtocol (pid=8795)>: << quit
+2026-04-11 14:17:39,957 chess.engine (engine.py:947) DEBUG <UciProtocol (pid=8795)>: Process exited
+2026-04-11 14:17:39,957 chess.engine (engine.py:934) DEBUG <UciProtocol (pid=8795)>: Connection lost (exit code: 0, error: None)
+2026-04-11 14:17:39,957 lib.lichess_bot (lichess_bot.py:1207) INFO Engine configuration OK
+2026-04-11 14:17:39,958 lib.lichess_bot (lichess_bot.py:1177) DEBUG Python version: 3.14.4.final.0
+2026-04-11 14:17:39,962 lib.lichess_bot (lichess_bot.py:1183) DEBUG Installed libraries:
+requests==2.33.1
+certifi==2026.2.25
+wheel==0.46.3
+idna==3.11
+rich==14.3.3
+markdown-it-py==4.0.0
+Pygments==2.20.0
+mdurl==0.1.2
+PyYAML==6.0.3
+urllib3==2.6.3
+charset-normalizer==3.4.7
+pip==26.0.1
+chess==1.11.2
+backoff==2.2.1
+git-filter-repo==2.47.0
+
+
+2026-04-11 14:17:39,963 urllib3.connectionpool (connectionpool.py:1049) DEBUG Starting new HTTPS connection (1): lichess.org:443
+2026-04-11 14:17:40,096 urllib3.connectionpool (connectionpool.py:544) DEBUG https://lichess.org:443 "POST /api/token/test HTTP/1.1" 200 None
+2026-04-11 14:17:40,140 urllib3.connectionpool (connectionpool.py:544) DEBUG https://lichess.org:443 "GET /api/account HTTP/1.1" 200 None
+2026-04-11 14:17:40,141 lib.lichess_bot (lichess_bot.py:1217) INFO Welcome mateichiriacbot!
+2026-04-11 14:17:40,148 lib.lichess_bot (lichess_bot.py:259) INFO You're now connected to https://lichess.org and awaiting challenges.
+2026-04-11 14:17:40,357 urllib3.connectionpool (connectionpool.py:544) DEBUG https://lichess.org:443 "GET /api/account/playing HTTP/1.1" 200 17
+2026-04-11 14:17:40,358 lib.blocklist (blocklist.py:41) INFO Refreshing 0 online blocklists
+2026-04-11 14:17:40,358 lib.matchmaking (matchmaking.py:265) INFO Next challenge will be created after Sat Apr 11 14:47:40 2026
+2026-04-11 14:17:40,359 lib.blocklist (blocklist.py:41) INFO Refreshing 0 online blocklists
