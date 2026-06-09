@@ -20,9 +20,25 @@ public class Search {
 
     private static final int MAX_PLY = 128;
 
-    private final MoveGenerator generator = new MoveGenerator();
-    private final Evaluator     evaluator = new Evaluator();
+    private final MoveGenerator    generator = new MoveGenerator();
+    private final StyleOrchestrator style;
+    private final Evaluator        evaluator;
     private       TranspositionTable tt    = new TranspositionTable(16);
+
+    // -------------------------------------------------------------------------
+    // Constructori
+    // -------------------------------------------------------------------------
+    public Search() {
+        this(new StyleOrchestrator());
+    }
+
+    public Search(StyleOrchestrator style) {
+        this.style     = style;
+        this.evaluator = new Evaluator(style);
+    }
+
+    // Expune orchestrator-ul ca sa poata fi modificat din UCI / un MLP extern
+    public StyleOrchestrator getStyle() { return style; }
 
     // -------------------------------------------------------------------------
     // Stare per search

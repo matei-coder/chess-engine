@@ -1,139 +1,60 @@
 package chess;
 
-public class Evaluator {
+/**
+ * Evaluare statica a pozitiei.
+ *
+ * Toate valorile (material + PST-uri) provin din StyleOrchestrator —
+ * Evaluator-ul nu mai stocheaza tablouri proprii. Asta permite ca
+ * un MLP (sau alt sistem de personalizare) sa modifice stilul de joc
+ * doar prin StyleOrchestrator.applyStyleModifiers().
+ *
+ * Hot path: evaluate() face UN field-load la inceput (hoist al array-ului
+ * weights() intr-un local final), apoi totul e doar acces direct in array.
+ * JIT inlineaza accesul → niciun overhead fata de static final array-uri.
+ */
+public final class Evaluator {
 
-    // Valorile de baza ale pieselor (in "centipawni" — 100 = un pion)
-    private static final int[] PIECE_VALUES = {
-        0,    // NONE
-        100,  // PAWN
-        320,  // KNIGHT
-        330,  // BISHOP
-        500,  // ROOK
-        900,  // QUEEN
-        20000 // KING
-    };
+    private final StyleOrchestrator style;
 
-    // Piece-Square Tables — bonusuri de pozitie pentru fiecare piesa
-    // Indexate din perspectiva ALBULUI (row 0 = randul 1 al albului)
-    // Pentru negru, oglindim indexul: sq -> 63 - sq
+    public Evaluator(StyleOrchestrator style) {
+        if (style == null) throw new NullPointerException("style");
+        this.style = style;
+    }
 
-    private static final int[] PST_PAWN = {
-         0,  0,  0,  0,  0,  0,  0,  0,
-        50, 50, 50, 50, 50, 50, 50, 50,  // rand 7 — aproape de promotie
-        10, 10, 20, 30, 30, 20, 10, 10,
-         5,  5, 10, 25, 25, 10,  5,  5,
-         0,  0,  0, 20, 20,  0,  0,  0,
-         5, -5,-10,  0,  0,-10, -5,  5,
-         5, 10, 10,-20,-20, 10, 10,  5,
-         0,  0,  0,  0,  0,  0,  0,  0   // rand 1 — niciodata nu ajunge aici
-    };
-
-    private static final int[] PST_KNIGHT = {
-        -50,-40,-30,-30,-30,-30,-40,-50,
-        -40,-20,  0,  0,  0,  0,-20,-40,
-        -30,  0, 10, 15, 15, 10,  0,-30,
-        -30,  5, 15, 20, 20, 15,  5,-30,
-        -30,  0, 15, 20, 20, 15,  0,-30,
-        -30,  5, 10, 15, 15, 10,  5,-30,
-        -40,-20,  0,  5,  5,  0,-20,-40,
-        -50,-40,-30,-30,-30,-30,-40,-50
-    };
-
-    private static final int[] PST_BISHOP = {
-        -20,-10,-10,-10,-10,-10,-10,-20,
-        -10,  0,  0,  0,  0,  0,  0,-10,
-        -10,  0,  5, 10, 10,  5,  0,-10,
-        -10,  5,  5, 10, 10,  5,  5,-10,
-        -10,  0, 10, 10, 10, 10,  0,-10,
-        -10, 10, 10, 10, 10, 10, 10,-10,
-        -10,  5,  0,  0,  0,  0,  5,-10,
-        -20,-10,-10,-10,-10,-10,-10,-20
-    };
-
-    private static final int[] PST_ROOK = {
-         0,  0,  0,  0,  0,  0,  0,  0,
-         5, 10, 10, 10, 10, 10, 10,  5,  // randul 7 — tura activa
-        -5,  0,  0,  0,  0,  0,  0, -5,
-        -5,  0,  0,  0,  0,  0,  0, -5,
-        -5,  0,  0,  0,  0,  0,  0, -5,
-        -5,  0,  0,  0,  0,  0,  0, -5,
-        -5,  0,  0,  0,  0,  0,  0, -5,
-         0,  0,  0,  5,  5,  0,  0,  0   // coloana d/e usor mai buna
-    };
-
-    private static final int[] PST_QUEEN = {
-        -20,-10,-10, -5, -5,-10,-10,-20,
-        -10,  0,  0,  0,  0,  0,  0,-10,
-        -10,  0,  5,  5,  5,  5,  0,-10,
-         -5,  0,  5,  5,  5,  5,  0, -5,
-          0,  0,  5,  5,  5,  5,  0, -5,
-        -10,  5,  5,  5,  5,  5,  0,-10,
-        -10,  0,  5,  0,  0,  0,  0,-10,
-        -20,-10,-10, -5, -5,-10,-10,-20
-    };
-
-    // Regele — in deschidere/mijloc de joc vrea sa fie ascuns in spatele
-    // pionilor (rocada), nu in centru
-    private static final int[] PST_KING_MIDGAME = {
-        -30,-40,-40,-50,-50,-40,-40,-30,
-        -30,-40,-40,-50,-50,-40,-40,-30,
-        -30,-40,-40,-50,-50,-40,-40,-30,
-        -30,-40,-40,-50,-50,-40,-40,-30,
-        -20,-30,-30,-40,-40,-30,-30,-20,
-        -10,-20,-20,-20,-20,-20,-20,-10,
-         20, 20,  0,  0,  0,  0, 20, 20,  // dupa rocada e ok
-         20, 30, 10,  0,  0, 10, 30, 20
-    };
-
-    // -------------------------------------------------------------------------
-    // Evaluarea principala
-    // -------------------------------------------------------------------------
+    // Backward-compat: foloseste un StyleOrchestrator default cu valori empirice
+    public Evaluator() {
+        this(new StyleOrchestrator());
+    }
 
     // Returneaza scorul din perspectiva albului:
     //   pozitiv = bine pentru alb
     //   negativ = bine pentru negru
     public int evaluate(Board board) {
-        int score = 0;
+        // Hoist o singura data — restul buclei e pur acces in array
+        final int[] w = style.weights();
 
+        int score = 0;
         for (int sq = 0; sq < 64; sq++) {
             int piece = board.getSquare(sq);
             if (Piece.isEmpty(piece)) continue;
 
-            int value = pieceValue(piece, sq);
+            int type    = Piece.type(piece);                        // 1..6
+            int row     = sq >>> 3;
+            int col     = sq & 7;
+            int prow    = Piece.isWhite(piece) ? row : (7 - row);   // mirror rank pt negru
+            int symFile = (col < 4) ? col : (7 - col);              // mirror file (a≡h, b≡g, ...)
 
-            if (Piece.isWhite(piece)) {
-                score += value;
-            } else {
-                score -= value;
-            }
+            // Doua lookups in array-ul de weights:
+            //   1) valoarea materiala (indexata dupa tipul piesei)
+            //   2) bonus pozitional din PST-ul corespunzator tipului
+            int material = w[StyleOrchestrator.MAT_PAWN + type - 1];
+            int pst      = w[StyleOrchestrator.PST_BASE_BY_TYPE[type] + prow * 4 + symFile];
+
+            int value = material + pst;
+            if (Piece.isWhite(piece)) score += value;
+            else                       score -= value;
         }
-
         return score;
-    }
-
-    // Valoarea totala a unei piese = valoare de baza + bonus de pozitie
-    private int pieceValue(int piece, int sq) {
-        int type = Piece.type(piece);
-        int base = PIECE_VALUES[type];
-        int pst  = pstBonus(piece, sq);
-        return base + pst;
-    }
-
-    // Bonus de pozitie din PST
-    // Albul citeste tabelul normal (row 0 = baza lui)
-    // Negrul oglindeste indexul (row 7 devine row 0 pentru el)
-    private int pstBonus(int piece, int sq) {
-        int index = Piece.isWhite(piece) ? sq : (63 - sq);
-
-        return switch (Piece.type(piece)) {
-            case Piece.PAWN   -> PST_PAWN[index];
-            case Piece.KNIGHT -> PST_KNIGHT[index];
-            case Piece.BISHOP -> PST_BISHOP[index];
-            case Piece.ROOK   -> PST_ROOK[index];
-            case Piece.QUEEN  -> PST_QUEEN[index];
-            case Piece.KING   -> PST_KING_MIDGAME[index];
-            default           -> 0;
-        };
     }
 
     // Util: scorul din perspectiva jucatorului la mutare
