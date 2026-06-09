@@ -1,5 +1,6 @@
 package chess;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 // Implementarea protocolului UCI (Universal Chess Interface)
@@ -25,6 +26,8 @@ public class Uci {
 
     private final Search      search      = new Search();
     private final InputParser inputParser = new InputParser();
+    private boolean     ownBook     = true;
+    private OpeningBook openingBook = OpeningBook.openConfigured();
 
     // Bucla principala UCI — ruleaza pana primim "quit"
     public void run() {
@@ -41,10 +44,10 @@ public class Uci {
                 case "ucinewgame" -> handleNewGame();
                 case "position"   -> handlePosition(tokens);
                 case "go"         -> handleGo(tokens);
-                case "setoption"  -> { /* ignoram optiunile — nu crash */ }
+                case "setoption"  -> handleSetOption(tokens);
                 case "stop"       -> { /* ignoram — fara thread separat deocamdata */ }
                 case "ponderhit"  -> { /* ignoram */ }
-                case "quit"       -> { return; }
+                case "quit"       -> { closeOpeningBook(); return; }
             }
             // flush explicit — unele GUI-uri asteapta sa vada raspunsul imediat
             System.out.flush();
@@ -61,6 +64,9 @@ public class Uci {
         System.out.println("option name Hash type spin default 16 min 1 max 128");
         System.out.println("option name Threads type spin default 1 min 1 max 1");
         System.out.println("option name Move Overhead type spin default 30 min 0 max 5000");
+        System.out.println("option name OwnBook type check default true");
+        String defaultBook = OpeningBook.configuredPath();
+        System.out.println("option name BookFile type string default " + (defaultBook != null ? defaultBook : ""));
         System.out.println("uciok");
     }
 
@@ -136,6 +142,18 @@ public class Uci {
             } catch (NumberFormatException ignored) {}
         }
 
+        OpeningBook.BookMove bookMove = ownBook && openingBook != null
+            ? openingBook.findBookMove(board, colorToMove)
+            : null;
+        if (bookMove != null) {
+            System.out.println("info string book move " + bookMove.move
+                + " weight " + bookMove.weight
+                + " candidates " + bookMove.candidates);
+            System.out.println("bestmove " + bookMove.move);
+            System.out.flush();
+            return;
+        }
+
         Move best;
 
         if (depth > 0) {
@@ -161,6 +179,75 @@ public class Uci {
         // "bestmove" este singurul raspuns obligatoriu la comanda "go"
         System.out.println("bestmove " + (best != null ? best : "0000"));
         System.out.flush();
+    }
+
+    private void handleSetOption(String[] tokens) {
+        StringBuilder name = new StringBuilder();
+        StringBuilder value = new StringBuilder();
+        boolean readingName = false;
+        boolean readingValue = false;
+
+        for (int i = 1; i < tokens.length; i++) {
+            if (tokens[i].equalsIgnoreCase("name")) {
+                readingName = true;
+                readingValue = false;
+                continue;
+            }
+            if (tokens[i].equalsIgnoreCase("value")) {
+                readingName = false;
+                readingValue = true;
+                continue;
+            }
+
+            if (readingName) {
+                if (name.length() > 0) name.append(' ');
+                name.append(tokens[i]);
+            } else if (readingValue) {
+                if (value.length() > 0) value.append(' ');
+                value.append(tokens[i]);
+            }
+        }
+
+        String optionName = name.toString().trim();
+        String optionValue = value.toString().trim();
+
+        if (optionName.equalsIgnoreCase("OwnBook")) {
+            ownBook = parseCheck(optionValue);
+        } else if (optionName.equalsIgnoreCase("BookFile")) {
+            setBookFile(optionValue);
+        }
+    }
+
+    private boolean parseCheck(String value) {
+        return value.equalsIgnoreCase("true")
+            || value.equalsIgnoreCase("yes")
+            || value.equals("1");
+    }
+
+    private void setBookFile(String path) {
+        if (path.isBlank()) {
+            closeOpeningBook();
+            openingBook = null;
+            return;
+        }
+
+        try {
+            OpeningBook nextBook = new OpeningBook(path);
+            closeOpeningBook();
+            openingBook = nextBook;
+        } catch (IOException e) {
+            System.out.println("info string could not load opening book " + path);
+        }
+    }
+
+    private void closeOpeningBook() {
+        if (openingBook == null) return;
+        try {
+            openingBook.close();
+        } catch (IOException ignored) {
+        } finally {
+            openingBook = null;
+        }
     }
 
     // Aloca ~1/30 din timpul ramas + increment (formula simpla dar practica)

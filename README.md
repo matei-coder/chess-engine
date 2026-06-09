@@ -11,6 +11,7 @@ A chess engine written in Java, capable of playing via a console interface or ov
 - Check, checkmate, and stalemate detection
 - Position evaluation with piece-square tables
 - Alpha-beta search with iterative deepening and move ordering
+- Polyglot `.bin` opening book support, compatible with Donna opening books
 - UCI protocol support for integration with chess GUIs and Lichess
 
 ---
@@ -29,6 +30,8 @@ src/chess/
 ├── InputParser.java   — Parses "e2e4"-style strings into legal Move objects
 ├── Evaluator.java     — Static position evaluation
 ├── Search.java        — Iterative deepening alpha-beta search
+├── OpeningBook.java   — Polyglot opening book reader
+├── PolyglotRandom.java — Standard Polyglot Zobrist constants
 └── Uci.java           — UCI protocol handler
 ```
 
@@ -50,6 +53,22 @@ java -cp out chess.Main
 ```bash
 java -cp out chess.Main uci
 ```
+
+**Use Donna opening books:**
+```bash
+mkdir -p books
+curl -L -o books/gm2001.bin https://github.com/michaeldv/donna_opening_books/raw/master/gm2001.bin
+export DONNA_BOOK=books/gm2001.bin
+java -cp out chess.Main uci
+```
+
+The engine also accepts the UCI option `BookFile`, so a GUI or bot can set:
+```text
+setoption name BookFile value books/gm2001.bin
+```
+
+Supported Donna books include `gm2001.bin`, `komodo.bin`, and `rodent.bin`. They are
+ignored by git via `books/*.bin`.
 
 On Windows you can also use the included `run_engine.bat` script, which is the entry point used by `lichess-bot-config.yml`.
 
@@ -163,6 +182,13 @@ Castling has additional constraints: the king cannot castle while in check, and 
 | `go`          | Starts search; supports `depth`, `movetime`, `wtime`/`btime`/`winc`/`binc` |
 | `stop`        | Stops search (acknowledged, not yet threaded)           |
 | `quit`        | Exits the engine                                        |
+
+**Supported options:**
+
+| Option     | Type   | Description                                      |
+|------------|--------|--------------------------------------------------|
+| `OwnBook`  | check  | Enables or disables opening book moves           |
+| `BookFile` | string | Path to a Polyglot `.bin` book, including Donna books |
 
 **Time management:** When given `wtime`/`btime`, the engine allocates approximately `remaining_time / 30 + increment` milliseconds per move — a simple but effective formula for timed games.
 

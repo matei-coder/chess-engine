@@ -18,6 +18,7 @@ public class Main {
         InputParser parser = new InputParser();
         Search search     = new Search();
         Scanner scanner   = new Scanner(System.in);
+        OpeningBook openingBook = OpeningBook.openConfigured();
 
         System.out.println("=== Chess Engine ===");
         System.out.println("Tu joci cu Alb. Scrie mutarile in format: e2e4");
@@ -55,6 +56,7 @@ public class Main {
 
                     if (input.equals("quit")) {
                         System.out.println("La revedere!");
+                        closeOpeningBook(openingBook);
                         return;
                     }
                     if (input.equals("moves")) {
@@ -79,8 +81,19 @@ public class Main {
                     System.out.println("  (Negru e in SAH)");
                 }
 
-                System.out.println("Engine-ul calculeaza...");
-                Move best = search.findBestMove(board, Piece.BLACK, DEPTH);
+                Move best = null;
+                if (openingBook != null) {
+                    OpeningBook.BookMove bookMove = openingBook.findBookMove(board, Piece.BLACK);
+                    if (bookMove != null) {
+                        best = bookMove.move;
+                        System.out.println("Engine joaca din opening book: " + best);
+                    }
+                }
+
+                if (best == null) {
+                    System.out.println("Engine-ul calculeaza...");
+                    best = search.findBestMove(board, Piece.BLACK, DEPTH);
+                }
 
                 if (best == null) {
                     System.out.println("Engine-ul nu are mutari — joc terminat.");
@@ -94,5 +107,14 @@ public class Main {
         }
 
         scanner.close();
+        closeOpeningBook(openingBook);
+    }
+
+    private static void closeOpeningBook(OpeningBook openingBook) {
+        if (openingBook == null) return;
+        try {
+            openingBook.close();
+        } catch (Exception ignored) {
+        }
     }
 }
