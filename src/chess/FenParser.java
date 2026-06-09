@@ -45,6 +45,13 @@ public class FenParser {
             board.setEnPassantSquare(InputParser.parseSquare(parts[3]));
         }
 
+        // --- 5. Halfmove clock (pentru regula celor 50 de mutari) ---
+        if (parts.length > 4) {
+            try {
+                board.setHalfmoveClock(Integer.parseInt(parts[4]));
+            } catch (NumberFormatException ignored) {}
+        }
+
         return colorToMove;
     }
 

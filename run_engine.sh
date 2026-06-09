@@ -1,2 +1,3 @@
 #!/bin/bash
-java -cp "$(dirname "$0")/out" chess.Main uci
+cd "$(dirname "$0")"
+java -cp out chess.Main uci

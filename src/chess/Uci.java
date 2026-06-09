@@ -29,6 +29,11 @@ public class Uci {
     private boolean     ownBook     = true;
     private OpeningBook openingBook = OpeningBook.openConfigured();
 
+    // Istoricul jocului — hash-urile pozitiilor INAINTE de fiecare mutare aplicata.
+    // Trimis catre Search pentru detectarea repetitiei.
+    private long[] gameHistory    = new long[1024];
+    private int    gameHistoryLen = 0;
+
     // Bucla principala UCI — ruleaza pana primim "quit"
     public void run() {
         Scanner scanner = new Scanner(System.in);
@@ -74,8 +79,10 @@ public class Uci {
     // ucinewgame — reseteaza pozitia
     // ------------------------------------------------------------------
     private void handleNewGame() {
-        board        = new Board();
-        colorToMove  = Piece.WHITE;
+        board          = new Board();
+        colorToMove    = Piece.WHITE;
+        gameHistoryLen = 0;
+        search.clearHash();
     }
 
     // ------------------------------------------------------------------
@@ -86,6 +93,7 @@ public class Uci {
         if (tokens.length < 2) return;
 
         int movesIndex = -1; // indicele primei mutari din lista "moves"
+        gameHistoryLen = 0;  // resetam istoricul pentru fiecare pozitie noua
 
         if (tokens[1].equals("startpos")) {
             board       = new Board();
@@ -104,14 +112,23 @@ public class Uci {
             }
             board       = new Board();
             colorToMove = FenParser.parse(fen.toString().trim(), board);
+            // FenParser nu actualizeaza hash-ul Zobrist — recalculam de la zero
+            board.recomputeZobristHash();
             if (i < tokens.length && tokens[i].equals("moves")) {
                 movesIndex = i + 1;
             }
         }
 
-        // Aplicam mutarile din lista (istoricul jocului curent)
+        // Aplicam mutarile din lista (istoricul jocului curent).
+        // INAINTE de fiecare mutare inregistram hash-ul (cu side XOR) pentru
+        // detectarea repetitiei in search.
         if (movesIndex != -1) {
             for (int i = movesIndex; i < tokens.length; i++) {
+                long hash = board.getZobristHash()
+                    ^ (colorToMove == Piece.BLACK ? Board.ZOBRIST_BLACK_SIDE : 0);
+                if (gameHistoryLen < gameHistory.length) {
+                    gameHistory[gameHistoryLen++] = hash;
+                }
                 Move move = inputParser.parse(tokens[i], board, colorToMove);
                 if (move != null) {
                     board.makeMove(move);
@@ -146,13 +163,27 @@ public class Uci {
             ? openingBook.findBookMove(board, colorToMove)
             : null;
         if (bookMove != null) {
-            System.out.println("info string book move " + bookMove.move
+            System.out.println("info string book HIT " + bookMove.move
                 + " weight " + bookMove.weight
-                + " candidates " + bookMove.candidates);
+                + " candidates " + bookMove.candidates
+                + " (" + openingBook.getPath() + ")");
             System.out.println("bestmove " + bookMove.move);
             System.out.flush();
             return;
         }
+
+        // Loghez motivul caderii pe search — util la debug
+        if (!ownBook) {
+            System.out.println("info string book SKIP — OwnBook=false, searching");
+        } else if (openingBook == null) {
+            System.out.println("info string book SKIP — no book file loaded, searching");
+        } else {
+            System.out.println("info string book MISS — position not in "
+                + openingBook.getPath() + ", searching");
+        }
+
+        // Pasam istoricul jocului pentru detectarea repetitiei
+        search.setGameHistory(gameHistory, gameHistoryLen);
 
         Move best;
 
@@ -215,6 +246,11 @@ public class Uci {
             ownBook = parseCheck(optionValue);
         } else if (optionName.equalsIgnoreCase("BookFile")) {
             setBookFile(optionValue);
+        } else if (optionName.equalsIgnoreCase("Hash")) {
+            try {
+                int mb = Integer.parseInt(optionValue);
+                search.setHashSizeMB(mb);
+            } catch (NumberFormatException ignored) {}
         }
     }
 

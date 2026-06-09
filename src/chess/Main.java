@@ -22,7 +22,13 @@ public class Main {
 
         System.out.println("=== Chess Engine ===");
         System.out.println("Tu joci cu Alb. Scrie mutarile in format: e2e4");
-        System.out.println("Comenzi: 'quit' pentru iesire, 'moves' pentru mutari disponibile\n");
+        System.out.println("Comenzi: 'quit' pentru iesire, 'moves' pentru mutari disponibile");
+        if (openingBook != null) {
+            System.out.println("Opening book: " + openingBook.getPath());
+        } else {
+            System.out.println("Opening book: niciunul (engine-ul foloseste doar search)");
+        }
+        System.out.println();
 
         int colorToMove = Piece.WHITE;
 
@@ -86,12 +92,19 @@ public class Main {
                     OpeningBook.BookMove bookMove = openingBook.findBookMove(board, Piece.BLACK);
                     if (bookMove != null) {
                         best = bookMove.move;
-                        System.out.println("Engine joaca din opening book: " + best);
+                        System.out.println("[BOOK HIT] " + best
+                            + "  (weight " + bookMove.weight
+                            + ", " + bookMove.candidates + " candidates, "
+                            + openingBook.getPath() + ")");
+                    } else {
+                        System.out.println("[BOOK MISS] pozitia nu e in "
+                            + openingBook.getPath() + " — calculeaza...");
                     }
+                } else {
+                    System.out.println("[BOOK SKIP] niciun book incarcat — calculeaza...");
                 }
 
                 if (best == null) {
-                    System.out.println("Engine-ul calculeaza...");
                     best = search.findBestMove(board, Piece.BLACK, DEPTH);
                 }
 
