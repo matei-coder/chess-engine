@@ -34,6 +34,18 @@ public class Uci {
     private long[] gameHistory    = new long[1024];
     private int    gameHistoryLen = 0;
 
+    // Thread-ul de search (background). E null cand niciun search nu ruleaza.
+    private Thread searchThread = null;
+
+    // Timpul alocat search-ului curent, salvat pentru transitia ponderhit.
+    // (Cand suntem in ponder mode si primim ponderhit, folosim asta.)
+    private long pendingPonderTimeMs = 3000;
+
+    // Anunta UCI ca suportam pondering — apare in handshake
+    private void announcePonder() {
+        System.out.println("option name Ponder type check default true");
+    }
+
     // Bucla principala UCI — ruleaza pana primim "quit"
     public void run() {
         Scanner scanner = new Scanner(System.in);
@@ -45,14 +57,14 @@ public class Uci {
 
             switch (tokens[0]) {
                 case "uci"        -> handleUci();
-                case "isready"    -> System.out.println("readyok");
-                case "ucinewgame" -> handleNewGame();
-                case "position"   -> handlePosition(tokens);
-                case "go"         -> handleGo(tokens);
+                case "isready"    -> { waitForSearch(false); System.out.println("readyok"); }
+                case "ucinewgame" -> { waitForSearch(true);  handleNewGame(); }
+                case "position"   -> { waitForSearch(true);  handlePosition(tokens); }
+                case "go"         -> { waitForSearch(true);  handleGo(tokens); }
                 case "setoption"  -> handleSetOption(tokens);
-                case "stop"       -> { /* ignoram — fara thread separat deocamdata */ }
-                case "ponderhit"  -> { /* ignoram */ }
-                case "quit"       -> { closeOpeningBook(); return; }
+                case "stop"       -> handleStop();
+                case "ponderhit"  -> handlePonderhit();
+                case "quit"       -> { waitForSearch(true); closeOpeningBook(); return; }
             }
             // flush explicit — unele GUI-uri asteapta sa vada raspunsul imediat
             System.out.flush();
@@ -72,6 +84,7 @@ public class Uci {
         System.out.println("option name OwnBook type check default true");
         String defaultBook = OpeningBook.configuredPath();
         System.out.println("option name BookFile type string default " + (defaultBook != null ? defaultBook : ""));
+        announcePonder();
         System.out.println("uciok");
     }
 
@@ -145,8 +158,11 @@ public class Uci {
         int  depth       = -1;
         long moveTimeMs  = -1;
         long wtime = -1, btime = -1, winc = 0, binc = 0;
+        boolean isPonder = false;
 
-        for (int i = 1; i < tokens.length - 1; i++) {
+        for (int i = 1; i < tokens.length; i++) {
+            if (tokens[i].equals("ponder")) { isPonder = true; continue; }
+            if (i + 1 >= tokens.length) break;
             try {
                 switch (tokens[i]) {
                     case "depth"    -> depth      = Integer.parseInt(tokens[i + 1]);
@@ -159,57 +175,101 @@ public class Uci {
             } catch (NumberFormatException ignored) {}
         }
 
-        OpeningBook.BookMove bookMove = ownBook && openingBook != null
-            ? openingBook.findBookMove(board, colorToMove)
-            : null;
-        if (bookMove != null) {
-            System.out.println("info string book HIT " + bookMove.move
-                + " weight " + bookMove.weight
-                + " candidates " + bookMove.candidates
-                + " (" + openingBook.getPath() + ")");
-            System.out.println("bestmove " + bookMove.move);
-            System.out.flush();
-            return;
-        }
-
-        // Loghez motivul caderii pe search — util la debug
-        if (!ownBook) {
-            System.out.println("info string book SKIP — OwnBook=false, searching");
-        } else if (openingBook == null) {
-            System.out.println("info string book SKIP — no book file loaded, searching");
+        // Calculam timpul alocat search-ului (folosit fie acum, fie la ponderhit)
+        long allocatedMs;
+        int  searchDepth;
+        if (depth > 0) {
+            allocatedMs = Long.MAX_VALUE / 2; // sub limita, ca search-ul sa fie limitat doar de depth
+            searchDepth = depth;
+        } else if (moveTimeMs > 0) {
+            allocatedMs = moveTimeMs;
+            searchDepth = 99;
+        } else if (colorToMove == Piece.WHITE && wtime > 0) {
+            allocatedMs = allocateTime(wtime, winc);
+            searchDepth = 99;
+        } else if (colorToMove == Piece.BLACK && btime > 0) {
+            allocatedMs = allocateTime(btime, binc);
+            searchDepth = 99;
         } else {
-            System.out.println("info string book MISS — position not in "
-                + openingBook.getPath() + ", searching");
+            allocatedMs = 3000;
+            searchDepth = 99;
+        }
+        pendingPonderTimeMs = allocatedMs;
+
+        // Book — doar in mod normal, nu in ponder (in ponder cautam intentionat).
+        // Daca pondering-ul nimereste in book, GUI-ul nu primeste "bestmove"
+        // pana cand nu se intampla ponderhit/stop — pierdem oportunitatea.
+        if (!isPonder) {
+            OpeningBook.BookMove bookMove = ownBook && openingBook != null
+                ? openingBook.findBookMove(board, colorToMove)
+                : null;
+            if (bookMove != null) {
+                System.out.println("info string book HIT " + bookMove.move
+                    + " weight " + bookMove.weight
+                    + " candidates " + bookMove.candidates
+                    + " (" + openingBook.getPath() + ")");
+                System.out.println("bestmove " + bookMove.move);
+                System.out.flush();
+                return;
+            }
+
+            if (!ownBook) {
+                System.out.println("info string book SKIP — OwnBook=false, searching");
+            } else if (openingBook == null) {
+                System.out.println("info string book SKIP — no book file loaded, searching");
+            } else {
+                System.out.println("info string book MISS — position not in "
+                    + openingBook.getPath() + ", searching");
+            }
         }
 
         // Pasam istoricul jocului pentru detectarea repetitiei
         search.setGameHistory(gameHistory, gameHistoryLen);
 
-        Move best;
+        // Snapshot pentru worker (board-ul si culoarea sunt impartite — nu modificam
+        // pana cand worker-ul termina; vezi waitForSearch in switch-ul principal)
+        final Board boardRef    = board;
+        final int   colorRef    = colorToMove;
+        final int   finalDepth  = searchDepth;
+        final long  finalTimeMs = allocatedMs;
+        final boolean ponderFlag = isPonder;
 
-        if (depth > 0) {
-            // Cautare la adancime fixa
-            best = search.findBestMove(board, colorToMove, depth);
+        Thread t = new Thread(() -> {
+            Move best   = search.runSearch(boardRef, colorRef, finalDepth, finalTimeMs, ponderFlag);
+            Move ponder = search.getPonderMove(boardRef, colorRef, best);
 
-        } else if (moveTimeMs > 0) {
-            // Timp fix per mutare
-            best = search.findBestMoveInTime(board, colorToMove, moveTimeMs);
+            StringBuilder out = new StringBuilder("bestmove ")
+                .append(best != null ? best.toString() : "0000");
+            if (ponder != null) out.append(" ponder ").append(ponder);
+            System.out.println(out);
+            System.out.flush();
+        }, "Search-Worker");
+        searchThread = t;
+        t.start();
+    }
 
-        } else if (colorToMove == Piece.WHITE && wtime > 0) {
-            // Control de timp — aloca o portie din timpul ramas
-            best = search.findBestMoveInTime(board, colorToMove, allocateTime(wtime, winc));
+    // Anunta search-ul ca s-a intamplat ponderhit — switch din ponder mode la
+    // mod cu deadline. Search-ul curent continua, nu pornim unul nou.
+    private void handlePonderhit() {
+        search.ponderhit(pendingPonderTimeMs);
+    }
 
-        } else if (colorToMove == Piece.BLACK && btime > 0) {
-            best = search.findBestMoveInTime(board, colorToMove, allocateTime(btime, binc));
+    // Anunta search-ul sa abandoneze imediat. Worker-ul va printa bestmove si va muri.
+    private void handleStop() {
+        search.stop();
+    }
 
-        } else {
-            // Fallback: 3 secunde
-            best = search.findBestMoveInTime(board, colorToMove, 3000);
+    // Asteapta thread-ul de search sa se termine. Daca abortFirst, ii spunem si sa se opreasca.
+    private void waitForSearch(boolean abortFirst) {
+        Thread t = searchThread;
+        if (t == null || !t.isAlive()) return;
+        if (abortFirst) search.stop();
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
-
-        // "bestmove" este singurul raspuns obligatoriu la comanda "go"
-        System.out.println("bestmove " + (best != null ? best : "0000"));
-        System.out.flush();
+        searchThread = null;
     }
 
     private void handleSetOption(String[] tokens) {

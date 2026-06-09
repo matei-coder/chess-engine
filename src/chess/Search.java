@@ -35,6 +35,16 @@ public class Search {
     private long    timeLimit;
     private int     selDepth;
 
+    // -------------------------------------------------------------------------
+    // Control extern din UCI (volatile pentru ca sunt scrise din alt thread)
+    // -------------------------------------------------------------------------
+    // stopFlag: setat de UCI cand primeste "stop" sau cand pregateste un go nou
+    private volatile boolean stopFlag = false;
+    // ponderMode: in timpul ponderingului ignoram complet deadline-ul
+    private volatile boolean ponderMode = false;
+    // deadline: timpul absolut (ms epoch) la care trebuie sa oprim
+    private volatile long    deadline   = Long.MAX_VALUE;
+
     // Killer moves: 2 mutari tacute care au produs beta cutoff la fiecare ply.
     // Stocate ca int packed (flag<<12 | from<<6 | to) ca sa fie comparat ieftin.
     private final int[] killer1 = new int[MAX_PLY];
@@ -54,14 +64,48 @@ public class Search {
     private final long[] searchHistory = new long[MAX_PLY];
 
     // -------------------------------------------------------------------------
-    // API public — pastram semnaturile vechi
+    // API public — pastram semnaturile vechi pentru Main interactiv
     // -------------------------------------------------------------------------
     public Move findBestMove(Board board, int colorToMove, int depth) {
-        return iterativeDeepening(board, colorToMove, depth, Long.MAX_VALUE);
+        return runSearch(board, colorToMove, depth, Long.MAX_VALUE, false);
     }
 
     public Move findBestMoveInTime(Board board, int colorToMove, long timeLimitMs) {
-        return iterativeDeepening(board, colorToMove, 99, timeLimitMs);
+        return runSearch(board, colorToMove, 99, timeLimitMs, false);
+    }
+
+    // API generalizat pentru UCI: suporta ponder + abort
+    public Move runSearch(Board board, int colorToMove, int maxDepth,
+                          long timeLimitMs, boolean isPonder) {
+        this.stopFlag   = false;
+        this.ponderMode = isPonder;
+        this.deadline   = isPonder ? Long.MAX_VALUE
+                                   : System.currentTimeMillis() + timeLimitMs;
+        return iterativeDeepening(board, colorToMove, maxDepth, timeLimitMs);
+    }
+
+    // Apelat de UCI la "stop" — abort imediat
+    public void stop() { stopFlag = true; }
+
+    // Apelat de UCI la "ponderhit" — switch din ponder mode la time-limited
+    public void ponderhit(long allocatedMs) {
+        deadline   = System.currentTimeMillis() + allocatedMs;
+        ponderMode = false;
+    }
+
+    // Extragere ponder move din TT: cea mai buna replica adversarului dupa bestMove.
+    public Move getPonderMove(Board board, int colorToMove, Move bestMove) {
+        if (bestMove == null) return null;
+        GameState state = board.makeMove(bestMove);
+        long key = ttKey(board, opponent(colorToMove));
+        Move ponder = null;
+        if (tt.keyMatches(key)) {
+            long entry = tt.probe(key);
+            int packed = TranspositionTable.unpackMove(entry);
+            ponder = TranspositionTable.decodeMove(packed);
+        }
+        board.unmakeMove(bestMove, state);
+        return ponder;
     }
 
     public void setHashSizeMB(int mb) { tt.resize(Math.max(1, mb)); }
@@ -145,9 +189,12 @@ public class Search {
                 + " time "   + elapsed
                 + (bestSoFar != null ? " pv " + bestSoFar : ""));
 
-            if (System.currentTimeMillis() - startTime >= timeLimitMs) break;
+            // Verificare deadline (nu cand suntem in ponder mode — atunci timpul e infinit)
+            if (!ponderMode && System.currentTimeMillis() >= deadline) break;
+            // Stop extern
+            if (stopFlag) break;
             // Mate gasit — nu mai are sens sa cautam mai adanc
-            if (Math.abs(score) >= MATE_VAL - MAX_PLY) break;
+            if (Math.abs(score) >= MATE_VAL - MAX_PLY && !ponderMode) break;
         }
 
         return bestSoFar;
@@ -164,9 +211,10 @@ public class Search {
     // -------------------------------------------------------------------------
     private int alphaBeta(Board board, int color, int depth,
                           int alpha, int beta, boolean isRoot, int ply, boolean isPV) {
-        // Verificare timp (la fiecare 2048 noduri)
-        if ((nodesSearched & 2047) == 0 && timeLimit != Long.MAX_VALUE) {
-            if (System.currentTimeMillis() - startTime >= timeLimit) timeUp = true;
+        // Verificare timp/abort (la fiecare 2048 noduri)
+        if ((nodesSearched & 2047) == 0) {
+            if (stopFlag) timeUp = true;
+            else if (!ponderMode && System.currentTimeMillis() >= deadline) timeUp = true;
         }
         if (timeUp) return 0;
 
@@ -340,8 +388,9 @@ public class Search {
     // Quiescence Search — neschimbat fata de baseline, doar adaugam ply
     // -------------------------------------------------------------------------
     private int quiescence(Board board, int color, int alpha, int beta, int ply) {
-        if ((nodesSearched & 2047) == 0 && timeLimit != Long.MAX_VALUE) {
-            if (System.currentTimeMillis() - startTime >= timeLimit) timeUp = true;
+        if ((nodesSearched & 2047) == 0) {
+            if (stopFlag) timeUp = true;
+            else if (!ponderMode && System.currentTimeMillis() >= deadline) timeUp = true;
         }
         if (timeUp) return 0;
 
