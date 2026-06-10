@@ -88,5 +88,9 @@ cp "$target" "$tmp"
 mv -f "$tmp" "$CURRENT"
 trap - EXIT
 
-echo "✓ styles/current.json → $(basename "$target" .json)"
-echo "  Engine-ul reîncarcă automat la următorul 'go'."
+ts=$(date +%H:%M:%S)
+name=$(basename "$target" .json)
+desc=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('description',''))" "$target" 2>/dev/null || echo "")
+echo "[$ts] [pick] ✓ styles/current.json → $name"
+echo "         desc: $desc"
+echo "         → engine reîncarcă automat la următorul 'go'"

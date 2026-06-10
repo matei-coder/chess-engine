@@ -92,6 +92,74 @@ Nu mai necesită restart de bot, restart de engine, sau orice intervenție manua
 
 ---
 
+## Live watcher
+
+Vrei să vezi în timp real ce se întâmplă cu stilul + ce face engine-ul?
+
+```bash
+./scripts/watch.sh                    # default — style file + bot log
+./scripts/watch.sh --no-bot           # doar style file
+./scripts/watch.sh --bot-log <path>   # custom bot log
+```
+
+Output pe terminal (cu culori):
+- **`STYLE CHANGED`** — când `current.json` se modifică (brain sau pick), arată descrierea + diff per feature (`+ new`, `- removed`, `~ changed` cu deltas)
+- **`ENGINE`** — când engine-ul (via lichess-bot) loghează `info string style auto-reloaded` sau erori
+- **`GAME`** — când lichess-bot anunță început/sfârșit de joc
+
+Pune-l într-un terminal separat în timp ce bot-ul joacă, schimbi stiluri din alt terminal — vezi toată activitatea pe un singur ecran.
+
+---
+
+## NLP brain — text → style automat
+
+Modelul "homemade" (`scripts/brain.sh` → `style_brain.py`) traduce text liber
+(RO + EN) în vector de stil și-l scrie în `styles/current.json`. Combinat cu
+auto-reload, asta înseamnă: **scrii o frază, engine-ul își schimbă stilul**.
+
+### Folosire
+
+```bash
+./scripts/brain.sh "agresiv cu cai"             # RO
+./scripts/brain.sh "defensive solid endgame"    # EN
+./scripts/brain.sh "pozitional cu nebuni in deschise"  # mix
+./scripts/brain.sh -i                           # mod interactiv (REPL)
+./scripts/brain.sh --list                       # vezi keyword-urile recunoscute
+echo "patient slow" | ./scripts/brain.sh        # via stdin
+```
+
+### Cum funcționează (v1 — keyword-based)
+
+1. **Tokenize** text → lista de cuvinte (lower-case, fără punctuație)
+2. **Canonicalize**: sinonime RO/EN → keyword canonic (ex. "cai" → "knight")
+3. **Lookup**: fiecare keyword are o "semnătură" de feature deltas
+   (ex. `knight` → `MAT_KNIGHT +0.05, PST_KNIGHT +0.10, MAT_BISHOP -0.03`)
+4. **Sum + clamp**: adunăm delta-urile pe fiecare feature, clamp la `±0.20`,
+   conversie la multiplicator (`1.0 + delta`), clamp final la `[0.80, 1.25]`
+5. **Atomic write** în `styles/current.json` (tmp + rename)
+6. **Engine auto-reload** la următorul `go`
+
+### Keywords recunoscute (v1)
+
+Stil: `aggressive`, `defensive`, `solid`, `tactical`, `positional`, `patient`,
+`attack`, `simplify`, `trade`, `endgame`, `open`, `closed`, `fast`, `slow`
+Piese: `knight`, `bishop`, `rook`, `queen`, `pawn`
+
+Plus sinonime RO: `agresiv`, `defensiv`, `cal/cai`, `nebun/nebuni`, etc.
+
+### Roadmap
+
+**v2 (viitor)**: înlocuim tabelul de keywords cu un MLP propriu antrenat pe
+date sintetice. Interfața `StyleBrain` din `style_brain.py` e gata pentru
+swap (clasă `KeywordBrain` → `MLPBrain`). Workflow viitor:
+
+1. Generăm dataset: (text, style_vector) — combinăm shuffled descrieri + variante
+2. Antrenăm MLP simplu (numpy, ~100 LOC)
+3. Înlocuim `KeywordBrain` cu `MLPBrain` care încarcă greutățile din `.npz`
+4. Output identic, generalizare mai bună la formulări neașteptate
+
+---
+
 ## Interactive style session
 
 Pentru a explora stilurile manual (eval & mutări pe poziție data) cu live switching:
