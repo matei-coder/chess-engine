@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "description": "bishopy — prefers bishops over knights (good for open positions, long diagonals)",
+  "description": "knightly — prefers knights over bishops (good for closed positions)",
   "modifiers": {
-    "MAT_BISHOP": 1.08,
-    "MAT_KNIGHT": 0.96,
-    "PST_BISHOP": 1.15,
-    "PST_KNIGHT": 0.95
+    "MAT_KNIGHT": 1.08,
+    "MAT_BISHOP": 0.96,
+    "PST_KNIGHT": 1.15,
+    "PST_BISHOP": 0.95
   }
 }
