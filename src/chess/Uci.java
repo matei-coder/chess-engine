@@ -84,6 +84,7 @@ public class Uci {
         System.out.println("option name OwnBook type check default true");
         String defaultBook = OpeningBook.configuredPath();
         System.out.println("option name BookFile type string default " + (defaultBook != null ? defaultBook : ""));
+        System.out.println("option name StyleFile type string default ");
         announcePonder();
         System.out.println("uciok");
     }
@@ -311,6 +312,26 @@ public class Uci {
                 int mb = Integer.parseInt(optionValue);
                 search.setHashSizeMB(mb);
             } catch (NumberFormatException ignored) {}
+        } else if (optionName.equalsIgnoreCase("StyleFile")) {
+            setStyleFile(optionValue);
+        }
+    }
+
+    // Incarca un fisier de stil JSON sau, daca path-ul e gol, reseteaza la baseline.
+    private void setStyleFile(String path) {
+        if (path == null || path.isBlank()) {
+            search.getStyle().resetToBaseline();
+            System.out.println("info string style reset to baseline");
+            return;
+        }
+        try {
+            String desc = StyleLoader.loadFromFile(java.nio.file.Path.of(path), search.getStyle());
+            System.out.println("info string style loaded from " + path
+                + (desc != null ? " (\"" + desc + "\")" : ""));
+        } catch (java.io.IOException e) {
+            System.out.println("info string failed to read style file " + path + ": " + e.getMessage());
+        } catch (RuntimeException e) {
+            System.out.println("info string invalid style file " + path + ": " + e.getMessage());
         }
     }
 

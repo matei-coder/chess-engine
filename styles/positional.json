@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "description": "positional style — devalues queen slightly, amplifies minor piece coordination",
+  "modifiers": {
+    "MAT_KNIGHT": 1.10,
+    "MAT_BISHOP": 1.12,
+    "MAT_QUEEN":  0.92,
+    "PST_KNIGHT": 1.40,
+    "PST_BISHOP": 1.40,
+    "PST_ROOK":   1.20
+  }
+}

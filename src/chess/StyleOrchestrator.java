@@ -1,5 +1,9 @@
 package chess;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * Single source of truth for all eval parameters (material values + PSTs).
  *
@@ -54,6 +58,42 @@ public final class StyleOrchestrator {
     // Reserved slots (defaults la 0 = feature dezactivat).
     public static final int PAWN_ISOLATED_MG = 198;
     public static final int PAWN_DOUBLED_MG  = 199;
+
+    // -------------------------------------------------------------------------
+    // Broadcast groups — pentru JSON-style files in forma "named"
+    // -------------------------------------------------------------------------
+    // Ex: {"PST_PAWN": 1.2} => multiplica TOATE cele 32 valori ale PST_PAWN cu 1.2
+    // Numele de grup poate referi:
+    //   - un singur indice (ex. "MAT_PAWN") sau
+    //   - un bloc contiguu de indici (ex. "PST_PAWN" → 32 valori)
+    public static final Map<String, int[]> BROADCAST_GROUPS;
+    static {
+        Map<String, int[]> m = new LinkedHashMap<>();
+        // Singular
+        m.put("MAT_PAWN",   new int[]{ MAT_PAWN   });
+        m.put("MAT_KNIGHT", new int[]{ MAT_KNIGHT });
+        m.put("MAT_BISHOP", new int[]{ MAT_BISHOP });
+        m.put("MAT_ROOK",   new int[]{ MAT_ROOK   });
+        m.put("MAT_QUEEN",  new int[]{ MAT_QUEEN  });
+        m.put("MAT_KING",   new int[]{ MAT_KING   }); // locked anyway, dar oferim numele
+        // PST blocks (32 valori fiecare)
+        m.put("PST_PAWN",     rangeOf(PST_PAWN_BASE,    32));
+        m.put("PST_KNIGHT",   rangeOf(PST_KNIGHT_BASE,  32));
+        m.put("PST_BISHOP",   rangeOf(PST_BISHOP_BASE,  32));
+        m.put("PST_ROOK",     rangeOf(PST_ROOK_BASE,    32));
+        m.put("PST_QUEEN",    rangeOf(PST_QUEEN_BASE,   32));
+        m.put("PST_KING_MG",  rangeOf(PST_KING_MG_BASE, 32));
+        // Reserved scalari
+        m.put("PAWN_ISOLATED_MG", new int[]{ PAWN_ISOLATED_MG });
+        m.put("PAWN_DOUBLED_MG",  new int[]{ PAWN_DOUBLED_MG  });
+        BROADCAST_GROUPS = Collections.unmodifiableMap(m);
+    }
+
+    private static int[] rangeOf(int base, int len) {
+        int[] r = new int[len];
+        for (int i = 0; i < len; i++) r[i] = base + i;
+        return r;
+    }
 
     // -------------------------------------------------------------------------
     // Clamps — previn ca MLP-ul sa scoata valori care strica search-ul
