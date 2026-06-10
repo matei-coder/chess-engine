@@ -1,0 +1,349 @@
+[
+  {
+    "text": "play aggressive",
+    "modifiers": {
+      "PST_KNIGHT": 1.1,
+      "PST_BISHOP": 1.08
+    }
+  },
+  {
+    "text": "fii agressiv",
+    "modifiers": {
+      "PST_QUEEN": 1.12,
+      "PST_KNIGHT": 1.05
+    }
+  },
+  {
+    "text": "be careful",
+    "modifiers": {
+      "PST_KING_MG": 1.08,
+      "PAWN_ISOLATED_MG": 1.05
+    }
+  },
+  {
+    "text": "joacă tare",
+    "modifiers": {
+      "PST_KNIGHT": 1.08,
+      "MAT_PAWN": 0.95
+    }
+  },
+  {
+    "text": "I want it to attack",
+    "modifiers": {
+      "PST_KING_MG": 0.9,
+      "PST_QUEEN": 1.1
+    }
+  },
+  {
+    "text": "nu pierde",
+    "modifiers": {
+      "PST_KING_MG": 1.1,
+      "MAT_QUEEN": 1.05
+    }
+  },
+  {
+    "text": "to play safe",
+    "modifiers": {
+      "PST_KING_MG": 1.12
+    }
+  },
+  {
+    "text": "make it crazy",
+    "modifiers": {
+      "MAT_PAWN": 0.85,
+      "PST_KNIGHT": 1.15
+    }
+  },
+  {
+    "text": "joacă nebunesc",
+    "modifiers": {
+      "PST_QUEEN": 1.15,
+      "PST_KING_MG": 0.85
+    }
+  },
+  {
+    "text": "be defensiv please",
+    "modifiers": {
+      "PST_KING_MG": 1.15,
+      "PAWN_DOUBLED_MG": 1.1
+    }
+  },
+  {
+    "text": "atacă",
+    "modifiers": {
+      "PST_KNIGHT": 1.08
+    }
+  },
+  {
+    "text": "fii sigur",
+    "modifiers": {
+      "PST_KING_MG": 1.05
+    }
+  },
+  {
+    "text": "play sharp",
+    "modifiers": {
+      "PST_QUEEN": 1.1,
+      "MAT_PAWN": 0.9
+    }
+  },
+  {
+    "text": "joaca la siguranta",
+    "modifiers": {
+      "PST_KING_MG": 1.12,
+      "PAWN_ISOLATED_MG": 1.1
+    }
+  },
+  {
+    "text": "smash them",
+    "modifiers": {
+      "PST_KNIGHT": 1.15,
+      "PST_ROOK": 1.1
+    }
+  },
+  {
+    "text": "I would really like it if you could adopt a very calm and measured play style without taking any unnecessary risks at all during the match.",
+    "modifiers": {
+      "PST_KING_MG": 1.15,
+      "PAWN_ISOLATED_MG": 1.12,
+      "PST_PAWN": 1.08
+    }
+  },
+  {
+    "text": "go for the throat immediately",
+    "modifiers": {
+      "PST_QUEEN": 1.15,
+      "PST_KING_MG": 0.85
+    }
+  },
+  {
+    "text": "Vreau să ai un stil de joc extrem de liniștit și așezat, fără să te expui absolut deloc la atacuri tactice din partea adversarului pe parcursul întregii partide.",
+    "modifiers": {
+      "PST_KING_MG": 1.15,
+      "PST_PAWN": 1.05,
+      "PAWN_DOUBLED_MG": 1.12
+    }
+  },
+  {
+    "text": "îi plac caii foarte mult",
+    "modifiers": {
+      "MAT_KNIGHT": 1.12,
+      "PST_KNIGHT": 1.1
+    }
+  },
+  {
+    "text": "loves cavalry",
+    "modifiers": {
+      "MAT_KNIGHT": 1.1,
+      "PST_KNIGHT": 1.08
+    }
+  },
+  {
+    "text": "horse advocate",
+    "modifiers": {
+      "MAT_KNIGHT": 1.08,
+      "PST_KNIGHT": 1.05
+    }
+  },
+  {
+    "text": "super solid, un adevărat zid de netrecut",
+    "modifiers": {
+      "PST_KING_MG": 1.12,
+      "PAWN_DOUBLED_MG": 1.1
+    }
+  },
+  {
+    "text": "vrea sânge pe tablă",
+    "modifiers": {
+      "PST_QUEEN": 1.15,
+      "MAT_PAWN": 0.88
+    }
+  },
+  {
+    "text": "He is a thoughtful player who plays slowly, considering all options before committing to a plan, always making sure his king is perfectly safe.",
+    "modifiers": {
+      "PST_KING_MG": 1.14,
+      "PST_KNIGHT": 1.05,
+      "PAWN_ISOLATED_MG": 1.05
+    }
+  },
+  {
+    "text": "Îmi place enorm de mult când joci un șah extrem de agresiv și arunci totul în atac ignorând complet apărarea propriei tabere.",
+    "modifiers": {
+      "PST_KING_MG": 0.85,
+      "PST_ROOK": 1.12,
+      "PST_KNIGHT": 1.12
+    }
+  },
+  {
+    "text": "aggressive but solid king",
+    "modifiers": {
+      "PST_KING_MG": 1.08,
+      "PST_KNIGHT": 1.1
+    }
+  },
+  {
+    "text": "joacă cu knigt dar nu sacrifica regina",
+    "modifiers": {
+      "PST_KNIGHT": 1.12,
+      "MAT_QUEEN": 1.08
+    }
+  },
+  {
+    "text": "endgame focused with strong pawn play",
+    "modifiers": {
+      "PST_KING_MG": 0.9,
+      "PST_PAWN": 1.1
+    }
+  },
+  {
+    "text": "calm in opening but very sharp in the middlegame phase",
+    "modifiers": {
+      "PST_KING_MG": 1.05,
+      "PST_QUEEN": 1.08
+    }
+  },
+  {
+    "text": "un jucător de atac care totuși urăște să piardă pioni degeaba",
+    "modifiers": {
+      "PST_KNIGHT": 1.1,
+      "PAWN_ISOLATED_MG": 1.1,
+      "MAT_PAWN": 1.05
+    }
+  },
+  {
+    "text": "vrea finale dar iubește nebunii în loc de cai",
+    "modifiers": {
+      "PST_KING_MG": 0.88,
+      "MAT_BISHOP": 1.12,
+      "MAT_KNIGHT": 0.9
+    }
+  },
+  {
+    "text": "loves to attack with rooks but keeps the pawn structure fully intact",
+    "modifiers": {
+      "PST_ROOK": 1.15,
+      "PAWN_DOUBLED_MG": 1.12
+    }
+  },
+  {
+    "text": "sacrifică material pentru inițiativă dar își păstrează regele apărat",
+    "modifiers": {
+      "MAT_PAWN": 0.88,
+      "PST_KNIGHT": 1.1,
+      "PST_KING_MG": 1.1
+    }
+  },
+  {
+    "text": "I prefer a player who is extremely aggressive with the queen but at the same time is absolutely terrified of getting doubled or isolated pawns.",
+    "modifiers": {
+      "PST_QUEEN": 1.12,
+      "PAWN_DOUBLED_MG": 1.15,
+      "PAWN_ISOLATED_MG": 1.15
+    }
+  },
+  {
+    "text": "Vreau atacuri puternice pe flanc cu pionii tăi în timp ce reușești să ții centrul tablei complet închis, apărat și absolut impenetrabil.",
+    "modifiers": {
+      "PST_PAWN": 1.1,
+      "PST_KING_MG": 1.08
+    }
+  },
+  {
+    "text": "don't play passive",
+    "modifiers": {
+      "PST_KNIGHT": 1.1,
+      "PST_BISHOP": 1.1
+    }
+  },
+  {
+    "text": "nu vreau să tradezi reginele prea devreme",
+    "modifiers": {
+      "MAT_QUEEN": 1.12
+    }
+  },
+  {
+    "text": "avoid pawn weaknesses at all costs",
+    "modifiers": {
+      "PAWN_ISOLATED_MG": 1.15,
+      "PAWN_DOUBLED_MG": 1.15
+    }
+  },
+  {
+    "text": "don't be a coward",
+    "modifiers": {
+      "PST_KING_MG": 0.9,
+      "PST_KNIGHT": 1.08
+    }
+  },
+  {
+    "text": "no early queen sorties please",
+    "modifiers": {
+      "PST_QUEEN": 0.88
+    }
+  },
+  {
+    "text": "te rog să nu îți expui regele la pericole inutile",
+    "modifiers": {
+      "PST_KING_MG": 1.15
+    }
+  },
+  {
+    "text": "nu juca finaluri",
+    "modifiers": {
+      "PST_KING_MG": 1.12,
+      "MAT_QUEEN": 1.08
+    }
+  },
+  {
+    "text": "avoid trading the bishops for knights",
+    "modifiers": {
+      "MAT_BISHOP": 1.1,
+      "MAT_KNIGHT": 0.9
+    }
+  },
+  {
+    "text": "play normal",
+    "modifiers": {
+      "PST_KING_MG": 1.02
+    }
+  },
+  {
+    "text": "play smart",
+    "modifiers": {
+      "MAT_PAWN": 1.02,
+      "PST_KING_MG": 1.03
+    }
+  },
+  {
+    "text": "joaca bine te rog",
+    "modifiers": {
+      "PST_KING_MG": 1.01
+    }
+  },
+  {
+    "text": "be good",
+    "modifiers": {
+      "PST_PAWN": 1.02
+    }
+  },
+  {
+    "text": "do whatever",
+    "modifiers": {
+      "MAT_KNIGHT": 1.01
+    }
+  },
+  {
+    "text": "joacă ca un om",
+    "modifiers": {
+      "PST_KNIGHT": 1.03,
+      "PST_KING_MG": 0.98
+    }
+  },
+  {
+    "text": "just play",
+    "modifiers": {
+      "MAT_BISHOP": 1.01
+    }
+  }
+]

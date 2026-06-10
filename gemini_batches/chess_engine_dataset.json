@@ -1,0 +1,383 @@
+[
+  {
+    "text": "Prefers closed structures maneuvering with knights while keeping bishops safe on the board",
+    "modifiers": {
+      "MAT_KNIGHT": 1.1,
+      "PST_KNIGHT": 1.12,
+      "MAT_BISHOP": 1.05
+    }
+  },
+  {
+    "text": "Joacă extrem de solid și pozițional, detestând pionii dublați și structurile cu pioni izolați",
+    "modifiers": {
+      "PAWN_DOUBLED_MG": 1.15,
+      "PAWN_ISOLATED_MG": 1.15,
+      "PST_KING_MG": 1.08
+    }
+  },
+  {
+    "text": "Hyper-aggressive playstyle focusing on early queen attacks and sacrificing pawn structure",
+    "modifiers": {
+      "MAT_QUEEN": 1.12,
+      "PST_QUEEN": 1.15,
+      "PAWN_DOUBLED_MG": 0.88,
+      "PST_KING_MG": 0.9
+    }
+  },
+  {
+    "text": "Sacrifică material pentru o inițiativă puternică și plasamentul ideal al pieselor ușoare",
+    "modifiers": {
+      "MAT_PAWN": 0.9,
+      "MAT_BISHOP": 0.95,
+      "PST_BISHOP": 1.12,
+      "PST_KNIGHT": 1.1
+    }
+  },
+  {
+    "text": "Endgame grinder who heavily values pawn structure and advancing pawns towards promotion",
+    "modifiers": {
+      "MAT_PAWN": 1.1,
+      "PST_PAWN": 1.15,
+      "PAWN_ISOLATED_MG": 1.1
+    }
+  },
+  {
+    "text": "Caută mereu avantajul perechii de nebuni, păstrând diagonalele complet deschise pentru ei",
+    "modifiers": {
+      "MAT_BISHOP": 1.12,
+      "PST_BISHOP": 1.14
+    }
+  },
+  {
+    "text": "Completely ignores middlegame king safety in order to launch devastating pawn storms at the opponent",
+    "modifiers": {
+      "PST_KING_MG": 0.85,
+      "PST_PAWN": 1.12,
+      "MAT_PAWN": 0.95
+    }
+  },
+  {
+    "text": "Stil defensiv de fier, protejează regele cu orice preț și menține o structură compactă de pioni",
+    "modifiers": {
+      "PST_KING_MG": 1.15,
+      "PAWN_ISOLATED_MG": 1.12,
+      "PAWN_DOUBLED_MG": 1.1
+    }
+  },
+  {
+    "text": "Prioritizes rook activity on open files and the seventh rank over minor piece placement",
+    "modifiers": {
+      "MAT_ROOK": 1.08,
+      "PST_ROOK": 1.15,
+      "PST_KNIGHT": 0.95
+    }
+  },
+  {
+    "text": "Forțează schimbul reginelor cât mai devreme pentru a intra într-un final tehnic și liniștit",
+    "modifiers": {
+      "MAT_QUEEN": 0.85,
+      "PST_KING_MG": 0.9
+    }
+  },
+  {
+    "text": "Creates pure tactical chaos, preferring piece activity and attacking squares over static material points",
+    "modifiers": {
+      "PST_KNIGHT": 1.12,
+      "PST_BISHOP": 1.1,
+      "MAT_PAWN": 0.88,
+      "MAT_ROOK": 0.95
+    }
+  },
+  {
+    "text": "Iubește turnurile dublate pe coloanele centrale și controlează centrul tablei cu autoritate",
+    "modifiers": {
+      "PST_ROOK": 1.12,
+      "MAT_ROOK": 1.05
+    }
+  },
+  {
+    "text": "Plays a balanced classical style, slightly favoring bishops and solid pawn formations without extreme risks",
+    "modifiers": {
+      "MAT_BISHOP": 1.05,
+      "PAWN_ISOLATED_MG": 1.08,
+      "PST_KING_MG": 1.05
+    }
+  },
+  {
+    "text": "Ignoră complet valoarea pionilor dacă acest lucru îi aduce un atac decisiv asupra regelui advers",
+    "modifiers": {
+      "MAT_PAWN": 0.85,
+      "PST_QUEEN": 1.1,
+      "PST_KNIGHT": 1.05
+    }
+  },
+  {
+    "text": "Extremely cautious play, heavily protecting the king during the middlegame phase at all costs",
+    "modifiers": {
+      "PST_KING_MG": 1.15,
+      "MAT_PAWN": 1.05
+    }
+  },
+  {
+    "text": "Consideră că nebunii bine plasați sunt aproape la fel de puternici ca turnurile",
+    "modifiers": {
+      "MAT_BISHOP": 1.15,
+      "MAT_ROOK": 0.9,
+      "PST_BISHOP": 1.1
+    }
+  },
+  {
+    "text": "Willingly sacrifices the queen for a swarm of active minor pieces and rooks",
+    "modifiers": {
+      "MAT_QUEEN": 0.85,
+      "MAT_KNIGHT": 1.1,
+      "MAT_BISHOP": 1.1,
+      "MAT_ROOK": 1.05
+    }
+  },
+  {
+    "text": "Adoptă o strategie foarte agresivă bazată pe manevrarea rapidă a cailor în deschidere",
+    "modifiers": {
+      "PST_KNIGHT": 1.15,
+      "MAT_KNIGHT": 1.08
+    }
+  },
+  {
+    "text": "Extremely sensitive to damaged pawn structures, heavily penalizing any doubled or isolated pawns",
+    "modifiers": {
+      "PAWN_DOUBLED_MG": 1.15,
+      "PAWN_ISOLATED_MG": 1.14
+    }
+  },
+  {
+    "text": "Nu este deranjat de structurile slabe de pioni atâta timp cât obține spațiu și dinamism",
+    "modifiers": {
+      "PAWN_DOUBLED_MG": 0.85,
+      "PAWN_ISOLATED_MG": 0.88,
+      "PST_PAWN": 1.1
+    }
+  },
+  {
+    "text": "Positional python style, slowly restricting enemy mobility while maintaining absolute king safety",
+    "modifiers": {
+      "PST_PAWN": 1.08,
+      "PST_KING_MG": 1.1,
+      "MAT_ROOK": 1.05
+    }
+  },
+  {
+    "text": "Lansează atacuri la baionetă cu pionii pe flancul regelui, expunându-se dar creând amenințări letale",
+    "modifiers": {
+      "PST_PAWN": 1.15,
+      "PST_KING_MG": 0.85
+    }
+  },
+  {
+    "text": "Overvalues rooks when the board is open, often trading bishops to clear files",
+    "modifiers": {
+      "MAT_ROOK": 1.15,
+      "MAT_BISHOP": 0.9,
+      "PST_ROOK": 1.12
+    }
+  },
+  {
+    "text": "Evaluează precis forța pionilor în finaluri, transformând avantajele mărunte în victorii sigure",
+    "modifiers": {
+      "MAT_PAWN": 1.12,
+      "PST_PAWN": 1.1
+    }
+  },
+  {
+    "text": "Strongly prefers knights over bishops, especially aiming for locked centers and outposts",
+    "modifiers": {
+      "MAT_KNIGHT": 1.15,
+      "PST_KNIGHT": 1.15,
+      "MAT_BISHOP": 0.85,
+      "PST_BISHOP": 0.85
+    }
+  },
+  {
+    "text": "Refuză constant schimbul de regine, preferând să mențină tensiunea și potențialul de atac",
+    "modifiers": {
+      "MAT_QUEEN": 1.15,
+      "PST_QUEEN": 1.1
+    }
+  },
+  {
+    "text": "Absolutely hates playing with an isolated pawn but loves placing bishops on aggressive long diagonals",
+    "modifiers": {
+      "PAWN_ISOLATED_MG": 1.15,
+      "PST_BISHOP": 1.12
+    }
+  },
+  {
+    "text": "Adoptă o apărare pasivă, acordând o atenție exagerată siguranței regelui în dauna activității pieselor",
+    "modifiers": {
+      "PST_KING_MG": 1.15,
+      "PST_KNIGHT": 0.88,
+      "PST_BISHOP": 0.9
+    }
+  },
+  {
+    "text": "Mikhail Tal style tactical magic, giving up material and pawn integrity for devastating piece play",
+    "modifiers": {
+      "MAT_PAWN": 0.85,
+      "PAWN_DOUBLED_MG": 0.85,
+      "PST_KNIGHT": 1.14,
+      "PST_BISHOP": 1.12
+    }
+  },
+  {
+    "text": "Pune un accent deosebit pe valoarea reginei, pe care o folosește ca piesă centrală de atac",
+    "modifiers": {
+      "MAT_QUEEN": 1.14,
+      "PST_QUEEN": 1.12
+    }
+  },
+  {
+    "text": "Treats pawns primarily as defensive barricades to shelter the king and restrict enemy rooks",
+    "modifiers": {
+      "PST_PAWN": 1.1,
+      "PST_KING_MG": 1.12,
+      "MAT_PAWN": 1.05
+    }
+  },
+  {
+    "text": "Consideră că un turn activ pe o coloană deschisă compensează pentru un rege expus",
+    "modifiers": {
+      "PST_ROOK": 1.15,
+      "PST_KING_MG": 0.88
+    }
+  },
+  {
+    "text": "Fluid attacking mechanics heavily relying on queen and knight coordination around the enemy king",
+    "modifiers": {
+      "PST_QUEEN": 1.1,
+      "PST_KNIGHT": 1.12,
+      "MAT_KNIGHT": 1.05
+    }
+  },
+  {
+    "text": "Este dispus să piardă tempouri importante doar pentru a evita crearea de pioni dublați",
+    "modifiers": {
+      "PAWN_DOUBLED_MG": 1.15,
+      "PST_PAWN": 0.95
+    }
+  },
+  {
+    "text": "Extremely solid repertoire, happy to trade pieces and keep strict pawn integrity for an easy draw",
+    "modifiers": {
+      "MAT_QUEEN": 0.9,
+      "PAWN_DOUBLED_MG": 1.12,
+      "PAWN_ISOLATED_MG": 1.12
+    }
+  },
+  {
+    "text": "Apreciază caii centralizați masiv și detestă orice poziționare marginală a acestora",
+    "modifiers": {
+      "PST_KNIGHT": 1.15
+    }
+  },
+  {
+    "text": "Actively seeks imbalances by trading the queen for two rooks, valuing the latter highly",
+    "modifiers": {
+      "MAT_QUEEN": 0.9,
+      "MAT_ROOK": 1.1
+    }
+  },
+  {
+    "text": "Pionii sunt sufletul șahului, pune mare preț pe ei și evită sacrificiile de material",
+    "modifiers": {
+      "MAT_PAWN": 1.15,
+      "PAWN_DOUBLED_MG": 1.1
+    }
+  },
+  {
+    "text": "Prefers sneaky bishop maneuvers and fianchettos, valuing their long-range potential heavily",
+    "modifiers": {
+      "PST_BISHOP": 1.14,
+      "MAT_BISHOP": 1.08
+    }
+  },
+  {
+    "text": "Nu dă doi bani pe pioni sau pe structură atunci când pornește un atac pe flanc",
+    "modifiers": {
+      "MAT_PAWN": 0.85,
+      "PAWN_DOUBLED_MG": 0.85,
+      "PST_KING_MG": 0.9
+    }
+  },
+  {
+    "text": "Employs early rook lifts in the middlegame, valuing aggressive rook placement early on",
+    "modifiers": {
+      "PST_ROOK": 1.14,
+      "MAT_ROOK": 1.05
+    }
+  },
+  {
+    "text": "Regula numărul unu: regele trebuie să fie în siguranță absolută înainte de a lansa orice atac",
+    "modifiers": {
+      "PST_KING_MG": 1.15
+    }
+  },
+  {
+    "text": "Holds onto pawns tightly in the middlegame to ensure a winning numerical advantage in the endgame",
+    "modifiers": {
+      "MAT_PAWN": 1.12,
+      "PST_PAWN": 1.05
+    }
+  },
+  {
+    "text": "Sacrifică frecvent un cal pe unul sau doi pioni centrali pentru a deschide brutal poziția",
+    "modifiers": {
+      "MAT_KNIGHT": 0.85,
+      "MAT_PAWN": 1.1,
+      "PST_KNIGHT": 0.9
+    }
+  },
+  {
+    "text": "Dynamic style that completely ignores the drawback of isolated pawns if they provide piece activity",
+    "modifiers": {
+      "PAWN_ISOLATED_MG": 0.85,
+      "PST_KNIGHT": 1.1,
+      "PST_BISHOP": 1.1
+    }
+  },
+  {
+    "text": "Plasează nebunii pe cele mai agresive diagonale posibile, ignorând micile dezavantaje structurale",
+    "modifiers": {
+      "PST_BISHOP": 1.15,
+      "PAWN_DOUBLED_MG": 0.9
+    }
+  },
+  {
+    "text": "Always seeks to build heavy piece batteries, massively overvaluing the queen and rooks combined",
+    "modifiers": {
+      "MAT_QUEEN": 1.1,
+      "MAT_ROOK": 1.1,
+      "PST_ROOK": 1.05
+    }
+  },
+  {
+    "text": "Acceptă bucuros pioni dublați atâta timp cât aceștia îi consolidează un control ferm asupra centrului",
+    "modifiers": {
+      "PAWN_DOUBLED_MG": 0.85,
+      "PST_PAWN": 1.1
+    }
+  },
+  {
+    "text": "Deep positional understanding, strictly avoids any pawn weaknesses to prepare for perfect endgames",
+    "modifiers": {
+      "PAWN_ISOLATED_MG": 1.15,
+      "PAWN_DOUBLED_MG": 1.15,
+      "MAT_PAWN": 1.08
+    }
+  },
+  {
+    "text": "Tratează regele ca pe o piesă de luptă chiar și în middlegame, ignorând pericolele",
+    "modifiers": {
+      "PST_KING_MG": 0.85,
+      "PST_PAWN": 1.05
+    }
+  }
+]

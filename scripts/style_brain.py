@@ -185,6 +185,99 @@ class KeywordBrain(StyleBrain):
 
 
 # =============================================================================
+# v2: MLP Brain — loadează model antrenat (.npz + vocab)
+# =============================================================================
+class MLPBrain(StyleBrain):
+    """Antrenat via train_brain.py. Citeste .npz + vocab.json."""
+
+    MODEL_PATH = REPO_DIR / "models" / "style_mlp_v2.npz"
+    VOCAB_PATH = REPO_DIR / "models" / "style_vocab.json"
+
+    # Multiplicatori sub acest prag (in apropiere de 1.0) NU se includ in output —
+    # tine dict-ul curat (model prezice 1.0 ± noise pentru features neutre)
+    NEUTRAL_TOL = 0.01
+
+    def __init__(self):
+        try:
+            import numpy as np
+        except ImportError as e:
+            raise RuntimeError("numpy required for MLPBrain") from e
+        self.np = np
+        if not self.MODEL_PATH.exists() or not self.VOCAB_PATH.exists():
+            raise FileNotFoundError(
+                f"v2 model not found at {self.MODEL_PATH}. "
+                f"Train it first: ./scripts/train_brain.py"
+            )
+        npz = np.load(self.MODEL_PATH)
+        self.W1 = npz["W1"]; self.b1 = npz["b1"]
+        self.W2 = npz["W2"]; self.b2 = npz["b2"]
+        self.output_features = list(npz["output_features"].tolist())
+        with open(self.VOCAB_PATH) as f:
+            self.vocab = json.load(f)
+
+    def _encode(self, text: str):
+        np = self.np
+        n_words = len(self.vocab["words"])
+        n_tri   = len(self.vocab["trigrams"])
+        x = np.zeros(n_words + n_tri, dtype=np.float32)
+        for tok in tokenize(text):
+            if tok in self.vocab["words"]:
+                x[self.vocab["words"][tok]] += 1.0
+            # char trigrams cu padding
+            padded = "^" + tok + "$"
+            for i in range(len(padded) - 2):
+                tri = padded[i:i+3]
+                if tri in self.vocab["trigrams"]:
+                    x[n_words + self.vocab["trigrams"][tri]] += 0.5
+        n = np.linalg.norm(x)
+        return x / n if n > 0 else x
+
+    def predict(self, text: str) -> tuple[dict[str, float], dict[str, int]]:
+        np = self.np
+        x = self._encode(text)
+        if np.linalg.norm(x) < 1e-6:
+            # Niciun token cunoscut — return neutru
+            return {}, {}
+        # Forward (no dropout in eval)
+        h = np.maximum(0, x @ self.W1 + self.b1)
+        z = h @ self.W2 + self.b2
+        sig = 1.0 / (1.0 + np.exp(-z))
+        out = 0.5 + 1.5 * sig
+
+        # Filter near-neutral + clamp safety
+        modifiers: dict[str, float] = {}
+        for i, name in enumerate(self.output_features):
+            v = float(out[i])
+            # MAT_KING e mereu locked in StyleOrchestrator → nu-l include
+            if name == "MAT_KING":
+                continue
+            if abs(v - 1.0) < self.NEUTRAL_TOL:
+                continue
+            # Safety clamp (orchestrator-ul va face si el, dar pastram clean)
+            v = max(0.5, min(2.0, v))
+            modifiers[name] = round(v, 3)
+
+        info = {"mode": "mlp_v2", "input_tokens": len(tokenize(text))}
+        return modifiers, info
+
+
+# =============================================================================
+# Brain factory — auto / v1 / v2
+# =============================================================================
+def make_brain(mode: str = "auto") -> StyleBrain:
+    """mode: 'v1' (keyword), 'v2' (MLP), 'auto' (v2 daca exista, else v1)."""
+    if mode == "v1":
+        return KeywordBrain()
+    if mode == "v2":
+        return MLPBrain()
+    # auto
+    try:
+        return MLPBrain()
+    except (FileNotFoundError, RuntimeError):
+        return KeywordBrain()
+
+
+# =============================================================================
 # I/O — scriere atomică in current.json
 # =============================================================================
 def write_style_file(modifiers: dict[str, float], description: str) -> Path:
@@ -211,17 +304,26 @@ def _ts() -> str:
 def process_text(text: str, brain: StyleBrain, verbose: bool = True) -> bool:
     """Returnează True dacă a fost scris un fișier, False altfel."""
     modifiers, detected = brain.predict(text)
-    if not detected:
+    mode = detected.get("mode", "v1") if isinstance(detected, dict) and "mode" in detected else "v1"
+
+    if not modifiers:
         if verbose:
-            print(f"[{_ts()}] [brain] ❌ niciun keyword recunoscut in: {text!r}", file=sys.stderr)
-            print(f"           keywords disponibile: {', '.join(sorted(KEYWORDS.keys()))}", file=sys.stderr)
+            if mode.startswith("mlp"):
+                print(f"[{_ts()}] [brain/{mode}] ❌ niciun token recunoscut in vocab pentru: {text!r}", file=sys.stderr)
+            else:
+                print(f"[{_ts()}] [brain/{mode}] ❌ niciun keyword recunoscut in: {text!r}", file=sys.stderr)
+                print(f"           keywords v1 disponibile: {', '.join(sorted(KEYWORDS.keys()))}", file=sys.stderr)
         return False
 
-    desc = f"style_brain v1 from text: {text!r}"
+    desc_prefix = "MLP v2" if mode.startswith("mlp") else "v1"
+    desc = f"style_brain {desc_prefix} from text: {text!r}"
     write_style_file(modifiers, desc)
     if verbose:
-        kw_str = ", ".join(f"{k}×{v}" for k, v in sorted(detected.items()))
-        print(f"[{_ts()}] [brain] ✓ keywords: {kw_str}")
+        if mode.startswith("mlp"):
+            print(f"[{_ts()}] [brain/{mode}] ✓ inferred from {detected.get('input_tokens', '?')} tokens")
+        else:
+            kw_str = ", ".join(f"{k}×{v}" for k, v in sorted(detected.items()) if isinstance(v, int))
+            print(f"[{_ts()}] [brain/v1] ✓ keywords: {kw_str}")
         print(f"           modifiers ({len(modifiers)} non-neutral):")
         for k, v in sorted(modifiers.items()):
             arrow = "↑" if v > 1.0 else "↓"
@@ -231,29 +333,32 @@ def process_text(text: str, brain: StyleBrain, verbose: bool = True) -> bool:
 
 
 def main():
-    args = sys.argv[1:]
-    brain = KeywordBrain()
+    import argparse
+    ap = argparse.ArgumentParser(description="style_brain — text → style modifiers")
+    ap.add_argument("text", nargs="*", help="text de procesat (sau folosește -i pentru interactiv)")
+    ap.add_argument("--mode", choices=["v1", "v2", "auto"], default="auto",
+                    help="v1=keyword, v2=MLP, auto=v2 dacă există, altfel v1 (default: auto)")
+    ap.add_argument("-i", "--interactive", action="store_true", help="Mod interactiv REPL")
+    ap.add_argument("--list", "-l", action="store_true", help="Listează keywords v1 si exit")
+    args = ap.parse_args()
 
-    if not args:
-        # Stdin? sau interactive?
-        if sys.stdin.isatty():
-            print("Tasteaza descriere (Ctrl-D pentru iesire):")
-            for line in sys.stdin:
-                line = line.strip()
-                if not line:
-                    continue
-                process_text(line, brain)
-                print()
-        else:
-            text = sys.stdin.read().strip()
-            if text:
-                ok = process_text(text, brain)
-                sys.exit(0 if ok else 1)
-            print("usage: style_brain.py \"descriere\"  sau  echo \"text\" | style_brain.py", file=sys.stderr)
-            sys.exit(1)
+    if args.list:
+        print("Keywords disponibile (cu deltas):")
+        for kw in sorted(KEYWORDS.keys()):
+            print(f"  {kw}: {KEYWORDS[kw]}")
         return
 
-    if args[0] in ("--interactive", "-i"):
+    # Instantiate brain
+    try:
+        brain = make_brain(args.mode)
+    except (FileNotFoundError, RuntimeError) as e:
+        print(f"[brain] ERROR: {e}", file=sys.stderr)
+        sys.exit(2)
+    actual_mode = "v2" if isinstance(brain, MLPBrain) else "v1"
+    if args.mode == "auto":
+        print(f"[brain] auto-selected: {actual_mode}", file=sys.stderr)
+
+    if args.interactive:
         print("Tasteaza descriere (Ctrl-D pentru iesire):")
         try:
             while True:
@@ -264,13 +369,17 @@ def main():
             print()
         return
 
-    if args[0] in ("--list", "-l"):
-        print("Keywords disponibile (cu deltas):")
-        for kw in sorted(KEYWORDS.keys()):
-            print(f"  {kw}: {KEYWORDS[kw]}")
-        return
+    if not args.text:
+        # Citește din stdin (pipe)
+        if not sys.stdin.isatty():
+            text = sys.stdin.read().strip()
+            if text:
+                ok = process_text(text, brain)
+                sys.exit(0 if ok else 1)
+        print("usage: style_brain.py [--mode v1|v2|auto] \"descriere\"  sau  -i pentru interactiv", file=sys.stderr)
+        sys.exit(1)
 
-    text = " ".join(args)
+    text = " ".join(args.text)
     ok = process_text(text, brain)
     sys.exit(0 if ok else 1)
 

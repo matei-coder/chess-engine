@@ -1,0 +1,27 @@
+{
+  "trained_at": "2026-06-10 19:57:18",
+  "dataset_size": 750,
+  "train_size": 638,
+  "val_size": 112,
+  "input_dim": 2456,
+  "hidden_dim": 128,
+  "output_dim": 14,
+  "parameters": 316302,
+  "best_val_loss": 0.00111,
+  "epochs_run": 800,
+  "args": {
+    "epochs": 800,
+    "batch_size": 32,
+    "hidden": 128,
+    "lr": 0.012,
+    "momentum": 0.9,
+    "wd": 0.0001,
+    "dropout": 0.15,
+    "val_split": 0.15,
+    "patience": 50,
+    "seed": 42,
+    "vocab_words": 2500,
+    "vocab_trigrams": 1200,
+    "log_every": 30
+  }
+}

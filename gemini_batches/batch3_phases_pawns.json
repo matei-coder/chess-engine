@@ -1,0 +1,401 @@
+[
+  {
+    "text": "Hypermodern style, giving up the center to attack it later with minor pieces from afar",
+    "modifiers": {
+      "PST_PAWN": 0.93,
+      "PST_KNIGHT": 1.08,
+      "PST_BISHOP": 1.1
+    }
+  },
+  {
+    "text": "Deschidere clasică solidă, pune pionii centrali e4 și d4 pentru un avantaj static de spațiu",
+    "modifiers": {
+      "PST_PAWN": 1.12,
+      "PST_KING_MG": 1.1
+    }
+  },
+  {
+    "text": "Plays the King's Indian Defense, mastering pawn chains and launching deadly kingside attacks",
+    "modifiers": {
+      "PST_PAWN": 1.1,
+      "PST_KNIGHT": 1.08,
+      "PST_BISHOP": 0.95
+    }
+  },
+  {
+    "text": "Preferă gambitul, cedează bucuros un pion pentru dezvoltare superioară și o inițiativă formidabilă",
+    "modifiers": {
+      "MAT_PAWN": 0.88,
+      "PST_KNIGHT": 1.1,
+      "PST_BISHOP": 1.1
+    }
+  },
+  {
+    "text": "Solid Caro-Kann setups, refuses to create any pawn weaknesses in the opening phase",
+    "modifiers": {
+      "PAWN_DOUBLED_MG": 1.15,
+      "PAWN_ISOLATED_MG": 1.15,
+      "PST_KING_MG": 1.08
+    }
+  },
+  {
+    "text": "Joacă sistemul Hippopotamus, așteptând ca adversarul să se supraextindă masiv pentru a lovi pe contraatac",
+    "modifiers": {
+      "PST_PAWN": 0.9,
+      "PST_KNIGHT": 1.05,
+      "PST_KING_MG": 1.12
+    }
+  },
+  {
+    "text": "Sharp Sicilian Najdorf player, seeking extreme complications and tactical chaos right out of the opening",
+    "modifiers": {
+      "PST_QUEEN": 1.1,
+      "PST_KNIGHT": 1.12,
+      "PST_KING_MG": 0.95
+    }
+  },
+  {
+    "text": "Optează pentru apărarea Slavă, punând accent pe soliditate extremă și integritatea structurii de pioni",
+    "modifiers": {
+      "PAWN_DOUBLED_MG": 1.12,
+      "PAWN_ISOLATED_MG": 1.12,
+      "PST_PAWN": 1.05
+    }
+  },
+  {
+    "text": "Catalan opening maestro, maneuvering the fianchetto bishop to slowly squeeze the opponent off the board",
+    "modifiers": {
+      "PST_BISHOP": 1.15,
+      "PST_PAWN": 1.05,
+      "PAWN_ISOLATED_MG": 1.08
+    }
+  },
+  {
+    "text": "Joacă deschiderea Engleză cu manevre subtile, evitând confruntările tactice timpurii și simplificând inteligent",
+    "modifiers": {
+      "PST_KNIGHT": 1.08,
+      "PST_KING_MG": 1.08,
+      "MAT_QUEEN": 0.95
+    }
+  },
+  {
+    "text": "Extremely aggressive gambit lines, sacrifices pawn material willingly to open critical lines for bishops",
+    "modifiers": {
+      "MAT_PAWN": 0.85,
+      "PST_BISHOP": 1.15,
+      "PST_ROOK": 1.1
+    }
+  },
+  {
+    "text": "Deschidere hipermodernă în stil Reti, controlând centrul tablei cu piesele ușoare, ignorând expansiunea cu pioni",
+    "modifiers": {
+      "PST_PAWN": 0.88,
+      "PST_BISHOP": 1.12,
+      "PST_KNIGHT": 1.08
+    }
+  },
+  {
+    "text": "Karpov-like maneuvering, restricts counterplay completely and slowly crushes the opponent structurally in the middlegame",
+    "modifiers": {
+      "PST_KNIGHT": 1.12,
+      "PST_PAWN": 0.95,
+      "PAWN_ISOLATED_MG": 1.12
+    }
+  },
+  {
+    "text": "Joacă tactic ca Tal, aruncând piesele în atac și calculând riscuri uriașe pe tabla de joc",
+    "modifiers": {
+      "PST_QUEEN": 1.15,
+      "PST_BISHOP": 1.12,
+      "PST_KING_MG": 0.88,
+      "PST_KNIGHT": 1.1
+    }
+  },
+  {
+    "text": "Strategic squeezing, targeting the enemy's isolated queenside pawn mercilessly throughout the entire middlegame",
+    "modifiers": {
+      "PAWN_ISOLATED_MG": 1.15,
+      "PST_ROOK": 1.1,
+      "MAT_KNIGHT": 1.05
+    }
+  },
+  {
+    "text": "Atac rapid și decisiv în middlegame, își ține regele în siguranță absolută în timp ce atacă cu furie",
+    "modifiers": {
+      "PST_KING_MG": 1.15,
+      "PST_QUEEN": 1.12,
+      "PST_ROOK": 1.08
+    }
+  },
+  {
+    "text": "Shirov-style fire on board, dynamic middlegames with crazy tactical complications everywhere and massive sacrifices",
+    "modifiers": {
+      "PST_QUEEN": 1.12,
+      "PST_KNIGHT": 1.15,
+      "MAT_PAWN": 0.88
+    }
+  },
+  {
+    "text": "Petrosian-style fortress maker, prevents all counterplay before slowly advancing pieces behind impregnable pawn walls",
+    "modifiers": {
+      "PST_KING_MG": 1.12,
+      "PST_KNIGHT": 1.1,
+      "PAWN_ISOLATED_MG": 1.08
+    }
+  },
+  {
+    "text": "Morozevich-inspired unorthodox middlegame play, throwing pawns forward aggressively to create chaos and break rules",
+    "modifiers": {
+      "PST_PAWN": 1.15,
+      "PST_KING_MG": 0.85,
+      "PAWN_DOUBLED_MG": 0.9
+    }
+  },
+  {
+    "text": "Evită schimbul reginelor pentru a menține complexitatea tactică și șansele de atac în jocul de mijloc",
+    "modifiers": {
+      "MAT_QUEEN": 1.15,
+      "PST_QUEEN": 1.1,
+      "PST_KING_MG": 1.08
+    }
+  },
+  {
+    "text": "Calm positional player, relies on superior piece coordination and flawless pawn structure in quiet middlegames",
+    "modifiers": {
+      "PAWN_ISOLATED_MG": 1.12,
+      "PAWN_DOUBLED_MG": 1.12,
+      "PST_KNIGHT": 1.05
+    }
+  },
+  {
+    "text": "Presiune strategică imensă, vânează constant pionii slabi și dublați ai adversarului cu turnurile",
+    "modifiers": {
+      "PAWN_DOUBLED_MG": 1.15,
+      "PST_ROOK": 1.08
+    }
+  },
+  {
+    "text": "Kasparov-like dynamism, huge emphasis on piece activity compensating perfectly for any structural damage",
+    "modifiers": {
+      "PAWN_ISOLATED_MG": 0.88,
+      "PST_KNIGHT": 1.15,
+      "PST_BISHOP": 1.12,
+      "PST_QUEEN": 1.1
+    }
+  },
+  {
+    "text": "Manevrează lent caii pentru a obține o dominație pozițională sufocantă în centrul tablei",
+    "modifiers": {
+      "PST_KNIGHT": 1.15,
+      "MAT_KNIGHT": 1.08,
+      "PST_PAWN": 0.95
+    }
+  },
+  {
+    "text": "Avoids endgames at all costs, prefers keeping the tension and middlegame complications alive",
+    "modifiers": {
+      "PST_KING_MG": 1.12,
+      "PST_QUEEN": 1.15,
+      "MAT_QUEEN": 1.1
+    }
+  },
+  {
+    "text": "Loves endgames, eagerly trades pieces to enter endgames early with a highly active king",
+    "modifiers": {
+      "PST_KING_MG": 0.85,
+      "MAT_QUEEN": 0.85,
+      "PST_PAWN": 1.05
+    }
+  },
+  {
+    "text": "Specialist în finale de pioni, folosește regele activ și tehnica precisă pentru a câștiga avantaje minime",
+    "modifiers": {
+      "PST_KING_MG": 0.88,
+      "PST_PAWN": 1.15,
+      "MAT_PAWN": 1.1
+    }
+  },
+  {
+    "text": "Carlsen-like endgame grinding technique, flawlessly maneuvering minor pieces to squeeze water from a stone",
+    "modifiers": {
+      "PST_KING_MG": 0.92,
+      "MAT_KNIGHT": 1.08,
+      "MAT_BISHOP": 1.08,
+      "PST_PAWN": 1.05
+    }
+  },
+  {
+    "text": "Tehnică de finale impecabilă în stilul lui Smyslov, aduce regele în centru foarte devreme și sigur",
+    "modifiers": {
+      "PST_KING_MG": 0.85,
+      "MAT_KNIGHT": 1.05,
+      "MAT_BISHOP": 1.05
+    }
+  },
+  {
+    "text": "Capablanca-style simplicity, effortlessly converting slightly better pawn structures into victories in the endgame phase",
+    "modifiers": {
+      "PAWN_DOUBLED_MG": 1.15,
+      "PAWN_ISOLATED_MG": 1.15,
+      "PST_KING_MG": 0.9
+    }
+  },
+  {
+    "text": "Iubește finalurile cu cai, unde manevrele subtile, geometria și regele centralizat fac diferența",
+    "modifiers": {
+      "MAT_KNIGHT": 1.12,
+      "PST_KNIGHT": 1.1,
+      "PST_KING_MG": 0.88
+    }
+  },
+  {
+    "text": "Kramnik-style Berlin endgame specialist, deeply understands how to play without queens and activate the king",
+    "modifiers": {
+      "MAT_QUEEN": 0.85,
+      "PST_KING_MG": 0.88,
+      "PST_BISHOP": 1.1
+    }
+  },
+  {
+    "text": "Joacă finaluri de turnuri cu o precizie matematică, activând turnul și regele pe coloane deschise simultan",
+    "modifiers": {
+      "MAT_ROOK": 1.08,
+      "PST_ROOK": 1.12,
+      "PST_KING_MG": 0.9
+    }
+  },
+  {
+    "text": "Rushes into endgames where superior pawn structure and absence of queens guarantees a slow but inevitable victory",
+    "modifiers": {
+      "MAT_QUEEN": 0.88,
+      "PST_PAWN": 1.12,
+      "PAWN_ISOLATED_MG": 1.14
+    }
+  },
+  {
+    "text": "Activează regele imediat ce reginele sunt schimbate, dictând ritmul și dominând centrul în finalul partidei",
+    "modifiers": {
+      "PST_KING_MG": 0.85,
+      "MAT_QUEEN": 0.9
+    }
+  },
+  {
+    "text": "Master of opposite-colored bishop endgames, utilizing king activity and distant passed pawns effectively",
+    "modifiers": {
+      "PST_BISHOP": 1.15,
+      "PST_KING_MG": 0.88,
+      "PST_PAWN": 1.1
+    }
+  },
+  {
+    "text": "Fuge de complicațiile de mijloc de joc, forțând simplificările masive spre un final tehnic, uscat și sigur",
+    "modifiers": {
+      "MAT_QUEEN": 0.85,
+      "PST_KING_MG": 0.92,
+      "PAWN_ISOLATED_MG": 1.1
+    }
+  },
+  {
+    "text": "Lethal endgame technique, patiently extracts maximum value from every single pawn and minor piece",
+    "modifiers": {
+      "MAT_KNIGHT": 1.1,
+      "MAT_BISHOP": 1.1,
+      "MAT_PAWN": 1.12
+    }
+  },
+  {
+    "text": "Regele său este o piesă de atac redutabilă în finaluri, compensând adesea cu succes un pion minus",
+    "modifiers": {
+      "PST_KING_MG": 0.85,
+      "MAT_PAWN": 0.95,
+      "PST_PAWN": 1.05
+    }
+  },
+  {
+    "text": "Avoids endgames entirely, feeling extremely uncomfortable when the king is forced to step out and defend pawns",
+    "modifiers": {
+      "PST_KING_MG": 1.15,
+      "MAT_QUEEN": 1.15,
+      "PST_PAWN": 0.9
+    }
+  },
+  {
+    "text": "Absolutely hates isolated pawns, will reject active piece play if it means ruining his pawn integrity",
+    "modifiers": {
+      "PAWN_ISOLATED_MG": 1.15,
+      "PST_KNIGHT": 0.9
+    }
+  },
+  {
+    "text": "Tolerează structuri slabe de pioni pentru activitate maximă, adoptând un stil exploziv și foarte dinamic",
+    "modifiers": {
+      "PAWN_ISOLATED_MG": 0.88,
+      "PAWN_DOUBLED_MG": 0.88,
+      "PST_BISHOP": 1.12,
+      "PST_KNIGHT": 1.1
+    }
+  },
+  {
+    "text": "Closed Sicilian pawn chain master, slowly building enormous pressure behind firmly locked central pawns",
+    "modifiers": {
+      "PST_PAWN": 1.15,
+      "PST_KNIGHT": 1.1,
+      "PST_BISHOP": 0.92
+    }
+  },
+  {
+    "text": "Specialist în rupturi de pioni, calculează perfect momentul tensionării structurii centrale pentru a deschide centrul",
+    "modifiers": {
+      "PST_PAWN": 1.15,
+      "MAT_PAWN": 1.05
+    }
+  },
+  {
+    "text": "Accepts doubled pawns happily if they control key central squares and open crucial files for the rooks",
+    "modifiers": {
+      "PAWN_DOUBLED_MG": 0.85,
+      "PST_ROOK": 1.1,
+      "PST_PAWN": 1.05
+    }
+  },
+  {
+    "text": "Urăște pionii dublați, joacă o strategie extrem de curată, profilactică și total lipsită de riscuri structurale",
+    "modifiers": {
+      "PAWN_DOUBLED_MG": 1.15,
+      "PAWN_ISOLATED_MG": 1.12,
+      "PST_KING_MG": 1.08
+    }
+  },
+  {
+    "text": "Willing to suffer isolated queenside pawn structures to gain massive attacking potential and open diagonals",
+    "modifiers": {
+      "PAWN_ISOLATED_MG": 0.85,
+      "PST_KNIGHT": 1.15,
+      "PST_QUEEN": 1.1
+    }
+  },
+  {
+    "text": "Maestru în crearea de pioni trecuți, își bazează toată strategia pe avansarea unei structuri favorabile pe flancuri",
+    "modifiers": {
+      "PST_PAWN": 1.12,
+      "MAT_PAWN": 1.08
+    }
+  },
+  {
+    "text": "Pawn structure dictates everything; evaluates every position based purely on static pawn features over dynamic piece activity",
+    "modifiers": {
+      "PAWN_DOUBLED_MG": 1.15,
+      "PAWN_ISOLATED_MG": 1.15,
+      "MAT_PAWN": 1.12,
+      "PST_KNIGHT": 0.9
+    }
+  },
+  {
+    "text": "Compromite deliberat structura de pioni a adversarului, transformând slăbiciunile statice în ținte sigure pe termen lung",
+    "modifiers": {
+      "PAWN_DOUBLED_MG": 1.14,
+      "PAWN_ISOLATED_MG": 1.14,
+      "PST_ROOK": 1.08
+    }
+  }
+]

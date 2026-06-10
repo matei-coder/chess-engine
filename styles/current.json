@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "description": "style_brain v1 from text: 'schimb rapid de piese'",
+  "description": "style_brain MLP v2 from text: 'play like Tal aggressive sacrifices'",
   "modifiers": {
-    "MAT_KNIGHT": 1.04,
-    "MAT_BISHOP": 1.04,
-    "MAT_ROOK": 1.04,
-    "MAT_QUEEN": 1.04,
-    "PST_PAWN": 1.04,
-    "PST_KNIGHT": 1.04
+    "MAT_PAWN": 0.989,
+    "MAT_BISHOP": 1.011,
+    "PST_PAWN": 1.015,
+    "PST_KNIGHT": 1.035,
+    "PST_BISHOP": 1.014,
+    "PST_QUEEN": 1.011
   }
 }

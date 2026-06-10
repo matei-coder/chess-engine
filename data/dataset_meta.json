@@ -1,0 +1,89 @@
+{
+  "total_entries": 750,
+  "feature_coverage": {
+    "MAT_BISHOP": {
+      "count": 86,
+      "min": 0.85,
+      "max": 1.15,
+      "mean": 1.049
+    },
+    "MAT_KING": {
+      "count": 0
+    },
+    "MAT_KNIGHT": {
+      "count": 57,
+      "min": 0.85,
+      "max": 1.15,
+      "mean": 1.025
+    },
+    "MAT_PAWN": {
+      "count": 172,
+      "min": 0.85,
+      "max": 1.15,
+      "mean": 1.015
+    },
+    "MAT_QUEEN": {
+      "count": 130,
+      "min": 0.85,
+      "max": 1.15,
+      "mean": 0.963
+    },
+    "MAT_ROOK": {
+      "count": 53,
+      "min": 0.86,
+      "max": 1.15,
+      "mean": 1.049
+    },
+    "PAWN_DOUBLED_MG": {
+      "count": 89,
+      "min": 0.85,
+      "max": 1.15,
+      "mean": 1.076
+    },
+    "PAWN_ISOLATED_MG": {
+      "count": 131,
+      "min": 0.85,
+      "max": 1.15,
+      "mean": 1.097
+    },
+    "PST_BISHOP": {
+      "count": 156,
+      "min": 0.85,
+      "max": 1.15,
+      "mean": 1.07
+    },
+    "PST_KING_MG": {
+      "count": 317,
+      "min": 0.85,
+      "max": 1.15,
+      "mean": 0.996
+    },
+    "PST_KNIGHT": {
+      "count": 184,
+      "min": 0.85,
+      "max": 1.15,
+      "mean": 1.073
+    },
+    "PST_PAWN": {
+      "count": 120,
+      "min": 0.85,
+      "max": 1.15,
+      "mean": 1.056
+    },
+    "PST_QUEEN": {
+      "count": 136,
+      "min": 0.85,
+      "max": 1.15,
+      "mean": 1.087
+    },
+    "PST_ROOK": {
+      "count": 111,
+      "min": 0.85,
+      "max": 1.15,
+      "mean": 1.079
+    }
+  },
+  "ro_estimate": 314,
+  "en_estimate": 436,
+  "avg_modifiers_per_entry": 2.32
+}
