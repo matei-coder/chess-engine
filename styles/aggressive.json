@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "description": "aggressive style — values pawns and queen higher, amplifies center push",
+  "description": "aggressive (REGRESSION: SPRT measured -52 +/- 23 ELO vs balanced; kept as regression example)",
   "modifiers": {
     "MAT_PAWN":  1.30,
     "MAT_QUEEN": 1.15,

@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "description": "active — mild piece activity bonus, knights+bishops slightly mobilized",
+  "modifiers": {
+    "PST_KNIGHT": 1.10,
+    "PST_BISHOP": 1.10,
+    "PST_ROOK":   1.05,
+    "MAT_QUEEN":  1.02
+  }
+}

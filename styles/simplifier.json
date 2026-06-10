@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "description": "simplifier — values pieces slightly more, encouraging trades toward endgame",
+  "modifiers": {
+    "MAT_KNIGHT": 1.05,
+    "MAT_BISHOP": 1.05,
+    "MAT_ROOK":   1.05,
+    "MAT_QUEEN":  1.05,
+    "MAT_PAWN":   0.97,
+    "PST_KING_MG": 0.92
+  }
+}

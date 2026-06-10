@@ -11,7 +11,9 @@
       "Bash(/usr/libexec/java_home)",
       "Bash(export JAVA_HOME=$\\(/usr/libexec/java_home 2>/dev/null || echo \"\"\\))",
       "Read(//Library/Java/JavaVirtualMachines/**)",
-      "Bash(pip3 install:*)"
+      "Bash(pip3 install:*)",
+      "Bash(./tools/fastchess --help)",
+      "Bash(./scripts/match.sh styles/aggressive.json styles/balanced.json 2 1+0.05 2)"
     ]
   }
 }

@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "description": "solid — mild defensive: king safety up, pawn structure preserved, no risky pushes",
+  "modifiers": {
+    "PST_KING_MG": 1.10,
+    "PST_PAWN":    0.95,
+    "MAT_PAWN":    1.03,
+    "MAT_QUEEN":   1.02
+  }
+}

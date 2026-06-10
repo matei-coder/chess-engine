@@ -41,6 +41,12 @@ public class Uci {
     // (Cand suntem in ponder mode si primim ponderhit, folosim asta.)
     private long pendingPonderTimeMs = 3000;
 
+    // Path-ul + mtime-ul ultimului style file incarcat (pentru auto-reload).
+    // Cand fisierul e modificat extern (ex. picker care suprascrie atomically),
+    // engine-ul detecteaza la urmatorul handleGo si reincarca automat.
+    private java.nio.file.Path styleFilePath  = null;
+    private long               styleFileMtime = -1L;
+
     // Anunta UCI ca suportam pondering — apare in handshake
     private void announcePonder() {
         System.out.println("option name Ponder type check default true");
@@ -156,6 +162,10 @@ public class Uci {
     // go [depth n] [movetime ms] [wtime ms btime ms [winc ms] [binc ms]]
     // ------------------------------------------------------------------
     private void handleGo(String[] tokens) {
+        // Verifica daca fisierul de stil a fost modificat extern si reincarca.
+        // Asta permite "live style switching" in timpul jocurilor pe Lichess.
+        maybeReloadStyleFile();
+
         int  depth       = -1;
         long moveTimeMs  = -1;
         long wtime = -1, btime = -1, winc = 0, binc = 0;
@@ -321,17 +331,46 @@ public class Uci {
     private void setStyleFile(String path) {
         if (path == null || path.isBlank()) {
             search.getStyle().resetToBaseline();
+            styleFilePath  = null;
+            styleFileMtime = -1L;
             System.out.println("info string style reset to baseline");
             return;
         }
+        java.nio.file.Path p = java.nio.file.Path.of(path);
         try {
-            String desc = StyleLoader.loadFromFile(java.nio.file.Path.of(path), search.getStyle());
+            String desc = StyleLoader.loadFromFile(p, search.getStyle());
+            styleFilePath  = p;
+            styleFileMtime = java.nio.file.Files.getLastModifiedTime(p).toMillis();
             System.out.println("info string style loaded from " + path
                 + (desc != null ? " (\"" + desc + "\")" : ""));
         } catch (java.io.IOException e) {
             System.out.println("info string failed to read style file " + path + ": " + e.getMessage());
         } catch (RuntimeException e) {
             System.out.println("info string invalid style file " + path + ": " + e.getMessage());
+        }
+    }
+
+    // Verifica daca fisierul de stil curent s-a modificat pe disc si, daca da,
+    // il reincarca silentios. Apelata la inceputul fiecarei comenzi `go` —
+    // permite ca un picker extern sa schimbe stilul intre mutari, chiar in
+    // timpul unui joc pe Lichess.
+    private void maybeReloadStyleFile() {
+        if (styleFilePath == null) return;
+        try {
+            long mtime = java.nio.file.Files.getLastModifiedTime(styleFilePath).toMillis();
+            if (mtime == styleFileMtime) return; // neschimbat
+            String desc = StyleLoader.loadFromFile(styleFilePath, search.getStyle());
+            styleFileMtime = mtime;
+            System.out.println("info string style auto-reloaded from " + styleFilePath
+                + (desc != null ? " (\"" + desc + "\")" : ""));
+        } catch (java.io.IOException | RuntimeException e) {
+            // Reload esuat — pastram stilul anterior. Nu spamam logul pentru
+            // erori repetate (acelasi mtime se va incerca iar la urmatorul go).
+            System.out.println("info string style auto-reload failed: " + e.getMessage());
+            // Marcam mtime ca cel curent ca sa nu reincercam la fiecare nod.
+            try {
+                styleFileMtime = java.nio.file.Files.getLastModifiedTime(styleFilePath).toMillis();
+            } catch (java.io.IOException ignored) {}
         }
     }
 
