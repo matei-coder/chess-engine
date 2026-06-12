@@ -1,12 +1,13 @@
 {
   "version": 1,
-  "description": "style_brain MLP v2 from text: 'play like Tal aggressive sacrifices'",
+  "description": "style_brain MLP v2 from text: 'fa rocada urgent'",
   "modifiers": {
-    "MAT_PAWN": 0.989,
-    "MAT_BISHOP": 1.011,
-    "PST_PAWN": 1.015,
-    "PST_KNIGHT": 1.035,
-    "PST_BISHOP": 1.014,
-    "PST_QUEEN": 1.011
+    "MAT_PAWN": 1.022,
+    "MAT_KNIGHT": 1.018,
+    "PST_PAWN": 0.981,
+    "PST_KNIGHT": 1.022,
+    "PST_BISHOP": 0.982,
+    "PST_ROOK": 1.037,
+    "PAWN_DOUBLED_MG": 0.99
   }
 }
