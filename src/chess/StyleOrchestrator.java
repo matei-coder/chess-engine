@@ -24,7 +24,7 @@ public final class StyleOrchestrator {
     // -------------------------------------------------------------------------
     // Sizing & layout
     // -------------------------------------------------------------------------
-    public static final int NUM_FEATURES = 200;
+    public static final int NUM_FEATURES = 256;
 
     // Section bases (inclusive start indices, contiguous blocks).
     public static final int MAT_BASE         =   0; //  6 valori
@@ -34,7 +34,42 @@ public final class StyleOrchestrator {
     public static final int PST_ROOK_BASE    = 102;
     public static final int PST_QUEEN_BASE   = 134;
     public static final int PST_KING_MG_BASE = 166;
-    // [198..199] reserved pentru features viitoare (isolated pawn, doubled, etc.)
+    // [198..199] = PAWN_ISOLATED_MG, PAWN_DOUBLED_MG (compat brain v2)
+
+    // NEW eval features (Etapa 2 - tapered eval, king safety, pawn structure)
+    public static final int PST_KING_EG_BASE   = 200; // 32 valori — regele in endgame prefera centrul
+
+    // Scalari pentru eval matur
+    public static final int KING_SAFETY_BASE   = 232; // scaling pentru penalitatea de king safety
+    public static final int BISHOP_PAIR_MG     = 233;
+    public static final int BISHOP_PAIR_EG     = 234;
+    public static final int PASSED_PAWN_BASE   = 235; // bonus * (rank_advance) per pion passed
+    public static final int PAWN_ISOLATED_EG   = 236; // izolat in EG (mai grav)
+    public static final int PAWN_DOUBLED_EG    = 237;
+
+    // Mobility — bonus per legal move/atac
+    public static final int MOB_KNIGHT_MG = 238;
+    public static final int MOB_KNIGHT_EG = 239;
+    public static final int MOB_BISHOP_MG = 240;
+    public static final int MOB_BISHOP_EG = 241;
+    public static final int MOB_ROOK_MG   = 242;
+    public static final int MOB_ROOK_EG   = 243;
+    public static final int MOB_QUEEN_MG  = 244;
+    public static final int MOB_QUEEN_EG  = 245;
+
+    // Outposts — cavaleri/nebuni pe pătrate sigure (no enemy pawn poate ataca)
+    public static final int OUTPOST_KNIGHT_MG = 246;
+    public static final int OUTPOST_KNIGHT_EG = 247;
+    public static final int OUTPOST_BISHOP_MG = 248;
+    public static final int OUTPOST_BISHOP_EG = 249;
+
+    // Rook on file
+    public static final int ROOK_OPEN_FILE      = 250;
+    public static final int ROOK_SEMI_OPEN_FILE = 251;
+
+    // Pawn shield
+    public static final int PAWN_SHIELD_BASE = 252;
+    // [253..255] spare
 
     // Material — indici expliciti (ferim de off-by-one cu Piece.type()=1..6).
     public static final int MAT_PAWN   = MAT_BASE + 0;
@@ -55,7 +90,7 @@ public final class StyleOrchestrator {
         PST_KING_MG_BASE,
     };
 
-    // Reserved slots (defaults la 0 = feature dezactivat).
+    // Reserved slots (defaults activate cu valori reale acum).
     public static final int PAWN_ISOLATED_MG = 198;
     public static final int PAWN_DOUBLED_MG  = 199;
 
@@ -83,9 +118,35 @@ public final class StyleOrchestrator {
         m.put("PST_ROOK",     rangeOf(PST_ROOK_BASE,    32));
         m.put("PST_QUEEN",    rangeOf(PST_QUEEN_BASE,   32));
         m.put("PST_KING_MG",  rangeOf(PST_KING_MG_BASE, 32));
-        // Reserved scalari
+        m.put("PST_KING_EG",  rangeOf(PST_KING_EG_BASE, 32));
+        // Scalari
         m.put("PAWN_ISOLATED_MG", new int[]{ PAWN_ISOLATED_MG });
         m.put("PAWN_DOUBLED_MG",  new int[]{ PAWN_DOUBLED_MG  });
+        m.put("PAWN_ISOLATED_EG", new int[]{ PAWN_ISOLATED_EG });
+        m.put("PAWN_DOUBLED_EG",  new int[]{ PAWN_DOUBLED_EG  });
+        m.put("KING_SAFETY",      new int[]{ KING_SAFETY_BASE });
+        m.put("BISHOP_PAIR_MG",   new int[]{ BISHOP_PAIR_MG   });
+        m.put("BISHOP_PAIR_EG",   new int[]{ BISHOP_PAIR_EG   });
+        m.put("PASSED_PAWN",      new int[]{ PASSED_PAWN_BASE });
+        // Mobility
+        m.put("MOB_KNIGHT_MG",     new int[]{ MOB_KNIGHT_MG    });
+        m.put("MOB_KNIGHT_EG",     new int[]{ MOB_KNIGHT_EG    });
+        m.put("MOB_BISHOP_MG",     new int[]{ MOB_BISHOP_MG    });
+        m.put("MOB_BISHOP_EG",     new int[]{ MOB_BISHOP_EG    });
+        m.put("MOB_ROOK_MG",       new int[]{ MOB_ROOK_MG      });
+        m.put("MOB_ROOK_EG",       new int[]{ MOB_ROOK_EG      });
+        m.put("MOB_QUEEN_MG",      new int[]{ MOB_QUEEN_MG     });
+        m.put("MOB_QUEEN_EG",      new int[]{ MOB_QUEEN_EG     });
+        // Outposts
+        m.put("OUTPOST_KNIGHT_MG", new int[]{ OUTPOST_KNIGHT_MG });
+        m.put("OUTPOST_KNIGHT_EG", new int[]{ OUTPOST_KNIGHT_EG });
+        m.put("OUTPOST_BISHOP_MG", new int[]{ OUTPOST_BISHOP_MG });
+        m.put("OUTPOST_BISHOP_EG", new int[]{ OUTPOST_BISHOP_EG });
+        // Rook file
+        m.put("ROOK_OPEN_FILE",      new int[]{ ROOK_OPEN_FILE      });
+        m.put("ROOK_SEMI_OPEN_FILE", new int[]{ ROOK_SEMI_OPEN_FILE });
+        // Pawn shield
+        m.put("PAWN_SHIELD",      new int[]{ PAWN_SHIELD_BASE });
         BROADCAST_GROUPS = Collections.unmodifiableMap(m);
     }
 
@@ -254,8 +315,52 @@ public final class StyleOrchestrator {
             -30, -40, -40, -50,
         });
 
-        // Reserved features (zero by default = dezactivate).
-        // Cand le activam in Evaluator: baseValues[PAWN_ISOLATED_MG] = -15; etc.
+        // PST_KING_EG — regele in endgame VRea centru + activitate (inversul MG)
+        copyInto(PST_KING_EG_BASE, new int[]{
+            -50, -30, -20, -20,   // rank 1 (col a/h, b/g, c/f, d/e)
+            -30, -10,   0,   5,
+            -20,   0,  20,  30,
+            -20,   5,  30,  40,   // rank 4 — centru optim pentru rege in EG
+            -20,   5,  30,  40,
+            -20,   0,  20,  30,
+            -30, -10,   0,   5,
+            -50, -30, -20, -20,   // rank 8
+        });
+
+        // Eval features acum activate (in MG)
+        baseValues[PAWN_ISOLATED_MG] = -15;
+        baseValues[PAWN_DOUBLED_MG]  = -10;
+        baseValues[PAWN_ISOLATED_EG] = -25; // mai grav in EG
+        baseValues[PAWN_DOUBLED_EG]  = -20;
+
+        // King safety: scaling factor pentru penalitatea (atacatori^2)
+        baseValues[KING_SAFETY_BASE] = 10;
+
+        // Bishop pair
+        baseValues[BISHOP_PAIR_MG] = 30;
+        baseValues[BISHOP_PAIR_EG] = 50; // mai valoros in EG (board mai deschis)
+
+        // Passed pawn — bonus per rank avansat (multiplicat pe rank in Evaluator)
+        baseValues[PASSED_PAWN_BASE] = 15;
+
+        // Mobility — bonus per legal move (MG mai mic, EG mai mare)
+        baseValues[MOB_KNIGHT_MG] = 4;  baseValues[MOB_KNIGHT_EG] = 6;
+        baseValues[MOB_BISHOP_MG] = 3;  baseValues[MOB_BISHOP_EG] = 5;
+        baseValues[MOB_ROOK_MG]   = 2;  baseValues[MOB_ROOK_EG]   = 4;
+        baseValues[MOB_QUEEN_MG]  = 1;  baseValues[MOB_QUEEN_EG]  = 2;
+
+        // Outposts — bonus per piesa pe outpost
+        baseValues[OUTPOST_KNIGHT_MG] = 25;
+        baseValues[OUTPOST_KNIGHT_EG] = 15;
+        baseValues[OUTPOST_BISHOP_MG] = 15;
+        baseValues[OUTPOST_BISHOP_EG] = 10;
+
+        // Rook on open/semi-open file
+        baseValues[ROOK_OPEN_FILE]      = 25;
+        baseValues[ROOK_SEMI_OPEN_FILE] = 12;
+
+        // Pawn shield — bonus per pion in shield (rank 2 = full bonus, rank 3 = half)
+        baseValues[PAWN_SHIELD_BASE] = 12;
     }
 
     private void copyInto(int base, int[] block) {

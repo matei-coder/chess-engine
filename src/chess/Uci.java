@@ -85,7 +85,7 @@ public class Uci {
         System.out.println("id author " + ENGINE_AUTHOR);
         // Declarăm opțiunile standard — valorile sunt ignorate deocamdată
         System.out.println("option name Hash type spin default 16 min 1 max 128");
-        System.out.println("option name Threads type spin default 1 min 1 max 1");
+        System.out.println("option name Threads type spin default 1 min 1 max 8");
         System.out.println("option name Move Overhead type spin default 30 min 0 max 5000");
         System.out.println("option name OwnBook type check default true");
         String defaultBook = OpeningBook.configuredPath();
@@ -321,6 +321,11 @@ public class Uci {
             try {
                 int mb = Integer.parseInt(optionValue);
                 search.setHashSizeMB(mb);
+            } catch (NumberFormatException ignored) {}
+        } else if (optionName.equalsIgnoreCase("Threads")) {
+            try {
+                int n = Integer.parseInt(optionValue);
+                search.setThreadCount(n);
             } catch (NumberFormatException ignored) {}
         } else if (optionName.equalsIgnoreCase("StyleFile")) {
             setStyleFile(optionValue);

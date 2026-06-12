@@ -52,6 +52,9 @@ public class FenParser {
             } catch (NumberFormatException ignored) {}
         }
 
+        // Cache king position dupa load
+        board.recomputeKingPositions();
+
         return colorToMove;
     }
 

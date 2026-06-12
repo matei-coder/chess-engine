@@ -1,0 +1,308 @@
+[
+  {
+    "text": "attack",
+    "modifiers": {
+      "PST_QUEEN": 1.1,
+      "PST_KNIGHT": 1.08
+    }
+  },
+  {
+    "text": "defend",
+    "modifiers": {
+      "PST_KING_MG": 1.12
+    }
+  },
+  {
+    "text": "be solid",
+    "modifiers": {
+      "PST_KING_MG": 1.1
+    }
+  },
+  {
+    "text": "go wild",
+    "modifiers": {
+      "MAT_PAWN": 0.88,
+      "PST_KNIGHT": 1.13
+    }
+  },
+  {
+    "text": "play safe",
+    "modifiers": {
+      "PST_KING_MG": 1.13
+    }
+  },
+  {
+    "text": "trade queens",
+    "modifiers": {
+      "MAT_QUEEN": 0.9
+    }
+  },
+  {
+    "text": "keep queens",
+    "modifiers": {
+      "MAT_QUEEN": 1.1
+    }
+  },
+  {
+    "text": "push pawns",
+    "modifiers": {
+      "PST_PAWN": 1.12
+    }
+  },
+  {
+    "text": "love bishops",
+    "modifiers": {
+      "MAT_BISHOP": 1.12
+    }
+  },
+  {
+    "text": "love knights",
+    "modifiers": {
+      "MAT_KNIGHT": 1.12
+    }
+  },
+  {
+    "text": "hate knights",
+    "modifiers": {
+      "MAT_KNIGHT": 0.88
+    }
+  },
+  {
+    "text": "hate bishops",
+    "modifiers": {
+      "MAT_BISHOP": 0.88
+    }
+  },
+  {
+    "text": "active rooks",
+    "modifiers": {
+      "PST_ROOK": 1.12
+    }
+  },
+  {
+    "text": "no weak pawns",
+    "modifiers": {
+      "PAWN_ISOLATED_MG": 1.13,
+      "PAWN_DOUBLED_MG": 1.13
+    }
+  },
+  {
+    "text": "ignore pawns",
+    "modifiers": {
+      "PAWN_ISOLATED_MG": 0.88,
+      "PAWN_DOUBLED_MG": 0.88
+    }
+  },
+  {
+    "text": "endgame mode",
+    "modifiers": {
+      "PST_KING_MG": 0.88,
+      "MAT_PAWN": 1.1
+    }
+  },
+  {
+    "text": "king safety first",
+    "modifiers": {
+      "PST_KING_MG": 1.14
+    }
+  },
+  {
+    "text": "sacrifice freely",
+    "modifiers": {
+      "MAT_QUEEN": 0.9,
+      "MAT_ROOK": 0.92
+    }
+  },
+  {
+    "text": "hold material",
+    "modifiers": {
+      "MAT_QUEEN": 1.1,
+      "MAT_ROOK": 1.1
+    }
+  },
+  {
+    "text": "open it up",
+    "modifiers": {
+      "PST_BISHOP": 1.11
+    }
+  },
+  {
+    "text": "knights forward",
+    "modifiers": {
+      "PST_KNIGHT": 1.12
+    }
+  },
+  {
+    "text": "queen hunt",
+    "modifiers": {
+      "PST_QUEEN": 1.13
+    }
+  },
+  {
+    "text": "calm down",
+    "modifiers": {
+      "PST_KING_MG": 1.1,
+      "PST_QUEEN": 0.92
+    }
+  },
+  {
+    "text": "all in",
+    "modifiers": {
+      "PST_KING_MG": 0.88,
+      "PST_QUEEN": 1.12
+    }
+  },
+  {
+    "text": "atacă",
+    "modifiers": {
+      "PST_KNIGHT": 1.1,
+      "PST_QUEEN": 1.06
+    }
+  },
+  {
+    "text": "apără-te",
+    "modifiers": {
+      "PST_KING_MG": 1.12
+    }
+  },
+  {
+    "text": "fii solid",
+    "modifiers": {
+      "PST_KING_MG": 1.11
+    }
+  },
+  {
+    "text": "joacă agresiv",
+    "modifiers": {
+      "PST_QUEEN": 1.12,
+      "PST_KNIGHT": 1.06
+    }
+  },
+  {
+    "text": "joacă sigur",
+    "modifiers": {
+      "PST_KING_MG": 1.13
+    }
+  },
+  {
+    "text": "schimbă damele",
+    "modifiers": {
+      "MAT_QUEEN": 0.9
+    }
+  },
+  {
+    "text": "păstrează damele",
+    "modifiers": {
+      "MAT_QUEEN": 1.1
+    }
+  },
+  {
+    "text": "împinge pionii",
+    "modifiers": {
+      "PST_PAWN": 1.12
+    }
+  },
+  {
+    "text": "iubește nebunii",
+    "modifiers": {
+      "MAT_BISHOP": 1.12
+    }
+  },
+  {
+    "text": "iubește caii",
+    "modifiers": {
+      "MAT_KNIGHT": 1.12
+    }
+  },
+  {
+    "text": "urăște caii",
+    "modifiers": {
+      "MAT_KNIGHT": 0.88
+    }
+  },
+  {
+    "text": "urăște nebunii",
+    "modifiers": {
+      "MAT_BISHOP": 0.88
+    }
+  },
+  {
+    "text": "turnuri active",
+    "modifiers": {
+      "PST_ROOK": 1.12
+    }
+  },
+  {
+    "text": "fără pioni slabi",
+    "modifiers": {
+      "PAWN_ISOLATED_MG": 1.13,
+      "PAWN_DOUBLED_MG": 1.12
+    }
+  },
+  {
+    "text": "ignoră pionii",
+    "modifiers": {
+      "PAWN_ISOLATED_MG": 0.88,
+      "PAWN_DOUBLED_MG": 0.88
+    }
+  },
+  {
+    "text": "spre final",
+    "modifiers": {
+      "PST_KING_MG": 0.88,
+      "MAT_PAWN": 1.09
+    }
+  },
+  {
+    "text": "regele la adăpost",
+    "modifiers": {
+      "PST_KING_MG": 1.14
+    }
+  },
+  {
+    "text": "sacrifică liber",
+    "modifiers": {
+      "MAT_QUEEN": 0.9,
+      "MAT_ROOK": 0.92
+    }
+  },
+  {
+    "text": "ține materialul",
+    "modifiers": {
+      "MAT_QUEEN": 1.1,
+      "MAT_ROOK": 1.08
+    }
+  },
+  {
+    "text": "deschide jocul",
+    "modifiers": {
+      "PST_BISHOP": 1.11
+    }
+  },
+  {
+    "text": "caii înainte",
+    "modifiers": {
+      "PST_KNIGHT": 1.12
+    }
+  },
+  {
+    "text": "vânează dama",
+    "modifiers": {
+      "PST_QUEEN": 1.13
+    }
+  },
+  {
+    "text": "calmează-te",
+    "modifiers": {
+      "PST_QUEEN": 0.92,
+      "PST_KING_MG": 1.08
+    }
+  },
+  {
+    "text": "totul sau nimic",
+    "modifiers": {
+      "PST_KING_MG": 0.88,
+      "PST_QUEEN": 1.12
+    }
+  }
+]

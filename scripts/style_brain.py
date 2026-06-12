@@ -301,6 +301,58 @@ def _ts() -> str:
     return _t.strftime("%H:%M:%S")
 
 
+def _dataset_size() -> int | None:
+    """Numărul de exemple din dataset (pentru afișat în banner)."""
+    ds = REPO_DIR / "data" / "style_dataset.jsonl"
+    try:
+        with open(ds, encoding="utf-8") as f:
+            return sum(1 for line in f if line.strip())
+    except OSError:
+        return None
+
+
+def print_banner(mode: str) -> None:
+    """Banner de bun-venit gen Claude Code, cu un icon de șah, la pornirea REPL-ului."""
+    tty = sys.stdout.isatty()
+    if tty:
+        CYAN, GRAY, BOLD, DIM, RESET = (
+            "\033[36m", "\033[90m", "\033[1m", "\033[2m", "\033[0m")
+    else:
+        CYAN = GRAY = BOLD = DIM = RESET = ""
+
+    model = "MLP v2" if mode.startswith("v2") or mode.startswith("mlp") else "keyword v1"
+    n = _dataset_size()
+    meta = f"model: {model}" + (f" · {n} exemple" if n else "")
+
+    W = 50  # lățimea interioară a casetei
+    top    = "╭" + "─" * W + "╮"
+    bottom = "╰" + "─" * W + "╯"
+
+    ansi_re = re.compile(r"\033\[[0-9;]*m")
+
+    def row(left_glyph: str, text: str = "") -> str:
+        # left_glyph numără ca 1 caracter vizibil; padding pe lățime fixă,
+        # ignorând codurile ANSI (invizibile) la măsurare.
+        content = f"  {left_glyph}  {text}"
+        visible = len(ansi_re.sub("", content))
+        return f"{GRAY}│{RESET}{content}{' ' * max(W - visible, 0)}{GRAY}│{RESET}"
+
+    print()
+    print(f"{GRAY}{top}{RESET}")
+    print(row(" "))
+    print(row(f"{CYAN}{BOLD}♞{RESET}", f"{BOLD}Chess Style Brain{RESET}"))
+    print(row(" ", f"{DIM}text în limbaj natural → stil de joc{RESET}"))
+    print(row(" "))
+    print(f"{GRAY}{bottom}{RESET}")
+    print()
+    print(f"  {DIM}Scrie un stil în limbaj natural (RO / EN). Exemple:{RESET}")
+    print(f"    {CYAN}›{RESET} atacă cu caii        {CYAN}›{RESET} play safe endgame")
+    print(f"    {CYAN}›{RESET} sacrifică dama       {CYAN}›{RESET} solid like Petrosian")
+    print()
+    print(f"  {DIM}{meta} · Ctrl-D pentru ieșire{RESET}")
+    print()
+
+
 def process_text(text: str, brain: StyleBrain, verbose: bool = True) -> bool:
     """Returnează True dacă a fost scris un fișier, False altfel."""
     modifiers, detected = brain.predict(text)
@@ -359,10 +411,11 @@ def main():
         print(f"[brain] auto-selected: {actual_mode}", file=sys.stderr)
 
     if args.interactive:
-        print("Tasteaza descriere (Ctrl-D pentru iesire):")
+        print_banner(actual_mode)
+        prompt = "\033[36m♞ ›\033[0m " if sys.stdout.isatty() else "brain> "
         try:
             while True:
-                line = input("brain> ").strip()
+                line = input(prompt).strip()
                 if line:
                     process_text(line, brain)
         except (EOFError, KeyboardInterrupt):

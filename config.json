@@ -22,7 +22,7 @@
         "enabled": false
     },
     "opening": {
-        "file": "/Users/mateichiriac/Documents/chess-engine/test_positions/openings.epd",
+        "file": "test_positions/openings.epd",
         "format": 0,
         "order": 0,
         "plies": 16,
@@ -32,7 +32,7 @@
         "additional_lines_rgx": [],
         "event_name": "Fastchess Tournament",
         "site": "?",
-        "file": "/Users/mateichiriac/Documents/chess-engine/logs/sprt-aggressive-vs-balanced-20260610-112703.pgn",
+        "file": "logs/sprt-new-vs-old.pgn",
         "notation": 0,
         "append_file": true,
         "track_nodes": false,
@@ -60,7 +60,7 @@
     },
     "config_name": "config.json",
     "output": 0,
-    "seed": 1869850754458162305,
+    "seed": 11263833343893096458,
     "variant": 0,
     "type": 0,
     "gauntlet_seeds": 1,
@@ -69,8 +69,8 @@
     "wait": 0,
     "autosaveinterval": 20,
     "games": 2,
-    "rounds": 300,
-    "concurrency": 9,
+    "rounds": 100,
+    "concurrency": 8,
     "force_concurrency": false,
     "recover": false,
     "noswap": false,
@@ -89,19 +89,15 @@
     },
     "engines": [
         {
-            "name": "aggressive",
+            "name": "NEW",
             "dir": "",
-            "cmd": "/Users/mateichiriac/Documents/chess-engine/run_engine.sh",
+            "cmd": "/Users/mateichiriac/Documents/chess-engine/run_engine_new.sh",
             "args": "",
             "restart": false,
             "options": [
                 [
                     "OwnBook",
                     "false"
-                ],
-                [
-                    "StyleFile",
-                    "/Users/mateichiriac/Documents/chess-engine/styles/aggressive.json"
                 ]
             ],
             "limit": {
@@ -118,19 +114,15 @@
             "variant": 0
         },
         {
-            "name": "balanced",
+            "name": "OLD",
             "dir": "",
-            "cmd": "/Users/mateichiriac/Documents/chess-engine/run_engine.sh",
+            "cmd": "/Users/mateichiriac/Documents/chess-engine/run_engine_old.sh",
             "args": "",
             "restart": false,
             "options": [
                 [
                     "OwnBook",
                     "false"
-                ],
-                [
-                    "StyleFile",
-                    "/Users/mateichiriac/Documents/chess-engine/styles/balanced.json"
                 ]
             ],
             "limit": {
@@ -148,16 +140,16 @@
         }
     ],
     "stats": {
-        "aggressive vs balanced": {
-            "wins": 107,
-            "losses": 181,
-            "draws": 206,
-            "penta_WW": 11,
-            "penta_WD": 45,
-            "penta_WL": 40,
-            "penta_DD": 41,
-            "penta_LD": 79,
-            "penta_LL": 31
+        "NEW vs OLD": {
+            "wins": 39,
+            "losses": 12,
+            "draws": 7,
+            "penta_WW": 13,
+            "penta_WD": 5,
+            "penta_WL": 8,
+            "penta_DD": 0,
+            "penta_LD": 2,
+            "penta_LL": 1
         }
     }
 }

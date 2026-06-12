@@ -13,7 +13,14 @@
       "Read(//Library/Java/JavaVirtualMachines/**)",
       "Bash(pip3 install:*)",
       "Bash(./tools/fastchess --help)",
-      "Bash(./scripts/match.sh styles/aggressive.json styles/balanced.json 2 1+0.05 2)"
+      "Bash(./scripts/match.sh styles/aggressive.json styles/balanced.json 2 1+0.05 2)",
+      "Bash(cp /tmp/Evaluator.new.java src/chess/Evaluator.java)",
+      "Bash(cp /tmp/Search.new.java src/chess/Search.java)",
+      "Bash(cp /tmp/StyleOrchestrator.new.java src/chess/StyleOrchestrator.java)",
+      "Bash(chmod +x run_engine_new.sh run_engine_old.sh)",
+      "Bash(./tools/fastchess -engine name=NEW cmd=\"$\\(pwd\\)/run_engine_new.sh\" proto=uci option.OwnBook=false option.StyleFile= -engine name=OLD cmd=\"$\\(pwd\\)/run_engine_old.sh\" proto=uci option.OwnBook=false option.StyleFile= -each tc=5+0.05 -games 2 -rounds 100 -openings file=test_positions/openings.epd format=epd order=random plies=16 -repeat -resign movecount=4 score=600 -draw movenumber=40 movecount=8 score=10 -concurrency 8 -pgnout file=logs/sprt-new-vs-old.pgn -sprt elo0=0 elo1=10 alpha=0.05 beta=0.05 -ratinginterval 10)",
+      "Bash(./tools/fastchess -engine name=NEW cmd=\"$\\(pwd\\)/run_engine_new.sh\" proto=uci option.OwnBook=false -engine name=OLD cmd=\"$\\(pwd\\)/run_engine_old.sh\" proto=uci option.OwnBook=false -each tc=5+0.05 -games 2 -rounds 100 -openings file=test_positions/openings.epd format=epd order=random plies=16 -repeat -resign movecount=4 score=600 -draw movenumber=40 movecount=8 score=10 -concurrency 8 -pgnout file=logs/sprt-new-vs-old.pgn -sprt elo0=0 elo1=10 alpha=0.05 beta=0.05 -ratinginterval 10)",
+      "Bash(python3 scripts/style_brain.py -i)"
     ]
   }
 }

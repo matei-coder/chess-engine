@@ -12,11 +12,12 @@ public class Search {
     private static final int[] MVV_VALUES = { 0, 100, 320, 330, 500, 900, 20000 };
 
     // Scoruri pentru ordering (mai mare = incercat mai devreme)
-    private static final int SCORE_TT       = 10_000_000;
-    private static final int SCORE_PROMO    =  9_000_000;
-    private static final int SCORE_CAPTURE  =  1_000_000;
-    private static final int SCORE_KILLER1  =    800_000;
-    private static final int SCORE_KILLER2  =    790_000;
+    private static final int SCORE_TT          = 10_000_000;
+    private static final int SCORE_PROMO       =  9_000_000;
+    private static final int SCORE_CAPTURE     =  1_000_000;   // good captures (SEE >= 0)
+    private static final int SCORE_KILLER1     =    800_000;
+    private static final int SCORE_KILLER2     =    790_000;
+    private static final int SCORE_BAD_CAPTURE =    700_000;   // bad captures (SEE < 0) — dupa killers
 
     private static final int MAX_PLY = 128;
 
@@ -37,8 +38,30 @@ public class Search {
         this.evaluator = new Evaluator(style);
     }
 
+    // Constructor "helper" — partajeaza TT si stil cu un Search parinte.
+    // Folosit pentru Lazy SMP: fiecare worker thread are propriul Search,
+    // dar partajeaza TT-ul ca sa beneficieze de cutoff-urile altor thread-uri.
+    private Search(StyleOrchestrator style, TranspositionTable sharedTT) {
+        this.style     = style;
+        this.evaluator = new Evaluator(style);
+        this.tt        = sharedTT;
+    }
+
     // Expune orchestrator-ul ca sa poata fi modificat din UCI / un MLP extern
     public StyleOrchestrator getStyle() { return style; }
+
+    // -------------------------------------------------------------------------
+    // Multi-threading — Lazy SMP
+    // -------------------------------------------------------------------------
+    private int threadCount = 1;
+    private final java.util.List<Search> workers = new java.util.ArrayList<>();
+    private final java.util.List<Thread> workerThreads = new java.util.ArrayList<>();
+    private boolean isWorker = false;   // true daca acest Search e un worker (suprima output)
+
+    public void setThreadCount(int n) {
+        threadCount = Math.max(1, Math.min(8, n));
+    }
+    public int getThreadCount() { return threadCount; }
 
     // -------------------------------------------------------------------------
     // Stare per search
@@ -90,18 +113,66 @@ public class Search {
         return runSearch(board, colorToMove, 99, timeLimitMs, false);
     }
 
-    // API generalizat pentru UCI: suporta ponder + abort
+    // API generalizat pentru UCI: suporta ponder + abort + Lazy SMP
     public Move runSearch(Board board, int colorToMove, int maxDepth,
                           long timeLimitMs, boolean isPonder) {
         this.stopFlag   = false;
         this.ponderMode = isPonder;
         this.deadline   = isPonder ? Long.MAX_VALUE
                                    : System.currentTimeMillis() + timeLimitMs;
-        return iterativeDeepening(board, colorToMove, maxDepth, timeLimitMs);
+
+        // Cleanup workeri vechi (defensiv — ar trebui sa fie deja gata)
+        joinWorkersBest();
+
+        // Spawn workers daca avem threadCount > 1.
+        // Toti workerii partajeaza TT. Fiecare are propriul Board (deep copy)
+        // si propriul Search instance cu istoric/killers separat — randomizeaza
+        // ordinea explorarii prin TT races, ceea ce e baza Lazy SMP.
+        if (threadCount > 1 && !isWorker) {
+            for (int i = 0; i < threadCount - 1; i++) {
+                final Search w = new Search(style, tt);
+                w.isWorker      = true;
+                w.gameHistory   = this.gameHistory;
+                w.gameHistoryLen = this.gameHistoryLen;
+                w.stopFlag      = false;
+                w.ponderMode    = isPonder;
+                w.deadline      = this.deadline;
+                workers.add(w);
+                final Board workerBoard = board.deepCopy();
+                Thread t = new Thread(() -> {
+                    w.iterativeDeepening(workerBoard, colorToMove, maxDepth, timeLimitMs);
+                }, "Search-Worker-" + (i + 1));
+                t.setDaemon(true);
+                workerThreads.add(t);
+                t.start();
+            }
+        }
+
+        Move best = iterativeDeepening(board, colorToMove, maxDepth, timeLimitMs);
+
+        // Main e gata — opreste workerii si asteapta sa termine
+        stopWorkers();
+        joinWorkersBest();
+        return best;
     }
 
-    // Apelat de UCI la "stop" — abort imediat
-    public void stop() { stopFlag = true; }
+    private void stopWorkers() {
+        for (Search w : workers) w.stopFlag = true;
+    }
+
+    private void joinWorkersBest() {
+        for (Thread t : workerThreads) {
+            try { t.join(50); } catch (InterruptedException ignored) {}
+        }
+        workers.clear();
+        workerThreads.clear();
+    }
+
+    // Apelat de UCI la "stop" — abort imediat (inclusiv pentru workeri)
+    public void stop() {
+        stopFlag = true;
+        for (Search w : workers) w.stopFlag = true;
+    }
 
     // Apelat de UCI la "ponderhit" — switch din ponder mode la time-limited
     public void ponderhit(long allocatedMs) {
@@ -197,6 +268,13 @@ public class Search {
                 prevScore = score;
             }
 
+            // Workers nu fac output — ar amesteca rasunsurile UCI
+            if (isWorker) {
+                if (!ponderMode && System.currentTimeMillis() >= deadline) break;
+                if (stopFlag) break;
+                continue;
+            }
+
             long elapsed = System.currentTimeMillis() - startTime;
             System.out.println("info depth " + depth
                 + " seldepth " + selDepth
@@ -280,6 +358,17 @@ public class Search {
             }
         }
 
+        // -------- Reverse Futility Pruning (static null move) --------
+        // Daca eval static e cu mult peste beta, presupunem ca poziţia e atat
+        // de buna incat oponentul nu poate recupera → cutoff fara search.
+        // Tipic +20-50 ELO, 5 linii.
+        if (!isPV && !inCheck && depth <= 6 && beta < MATE_VAL - MAX_PLY) {
+            int eval = evaluator.evaluate(board, color);
+            if (eval - 100 * depth >= beta) {
+                return eval;
+            }
+        }
+
         // -------- Null Move Pruning --------
         // Dam adversarului mutarea gratis si vedem daca e tot bine pentru noi.
         // Sarim daca: in sah, in PV, nu avem material, sau depth prea mic.
@@ -327,6 +416,17 @@ public class Search {
             boolean isCapture = !Piece.isEmpty(state.capturedPiece) || move.isEnPassant();
             boolean isQuiet   = !isCapture && !move.isPromotion();
             boolean givesCheck = generator.isInCheck(board, opponent);
+
+            // -------- Late Move Pruning (LMP) --------
+            // La depth mic + multe mutari tacute deja incercate, sarim mutarile
+            // ramase complet. Tipic +30-50 ELO, mai ales la blitz/bullet.
+            // Scapa: PV node, in sah, da sah, captura, promotie, killer move.
+            if (!isPV && !inCheck && depth <= 3 && isQuiet && !givesCheck
+                    && legalCount > 5 + depth * depth
+                    && bestScore > -MATE_VAL + MAX_PLY) {
+                board.unmakeMove(move, state);
+                continue;
+            }
 
             // -------- Late Move Reductions --------
             int reduction = 0;
@@ -446,7 +546,7 @@ public class Search {
     }
 
     // -------------------------------------------------------------------------
-    // Move scoring (combinat — TT > capturi > killers > history)
+    // Move scoring (combinat — TT > good caps > killers > bad caps > history)
     // -------------------------------------------------------------------------
     private int scoreMove(Board board, Move move, int ttMove, int ply) {
         int packed = TranspositionTable.encodeMove(move);
@@ -455,13 +555,18 @@ public class Search {
         if (move.isPromotion()) return SCORE_PROMO;
 
         int captured = board.getSquare(move.to());
-        if (!Piece.isEmpty(captured)) {
+        if (!Piece.isEmpty(captured) || move.isEnPassant()) {
             int attackerType = Piece.type(board.getSquare(move.from()));
-            int victimType   = Piece.type(captured);
-            return SCORE_CAPTURE + 10 * MVV_VALUES[victimType] - MVV_VALUES[attackerType];
-        }
-        if (move.isEnPassant()) {
-            return SCORE_CAPTURE + 10 * MVV_VALUES[Piece.PAWN] - MVV_VALUES[Piece.PAWN];
+            int victimType   = move.isEnPassant() ? Piece.PAWN : Piece.type(captured);
+            int mvvLva = 10 * MVV_VALUES[victimType] - MVV_VALUES[attackerType];
+            // SEE — separam good captures (SEE >= 0) de bad (SEE < 0)
+            int seeVal = see(board, move);
+            if (seeVal >= 0) {
+                return SCORE_CAPTURE + mvvLva;
+            } else {
+                // Bad captures dupa killers; sortate intre ele cu seeVal (cele mai putin proaste primele)
+                return SCORE_BAD_CAPTURE + seeVal;  // seeVal e negativ; cele "0" sunt aproape de killer
+            }
         }
 
         if (ply < MAX_PLY) {
@@ -551,5 +656,170 @@ public class Search {
         }
         // KvK, KvK+minor, K+minor vs K
         return whiteMinors <= 1 && blackMinors <= 1;
+    }
+
+    // -------------------------------------------------------------------------
+    // SEE — Static Exchange Evaluation
+    // -------------------------------------------------------------------------
+    // Returneaza castigul/pierderea net materiala a unei serii de capturi pe
+    // patratul `move.to()`, asumand ca ambele tabere joaca optim (incepe mereu
+    // partea cu cea mai mica piesa).
+    //
+    // Folosit pentru:
+    //   - move ordering: capturi cu SEE>=0 sunt "good", SEE<0 sunt "bad"
+    //   - quiescence pruning (optional, mai tarziu): skip capturile clar pierzatoare
+    //
+    // Algoritmul "swap" (Stockfish-style, ignora x-rays simplificator).
+    // -------------------------------------------------------------------------
+    private static final boolean[] SEE_USED_SCRATCH = new boolean[64]; // thread-local OK (single-thread search)
+
+    public int see(Board board, Move move) {
+        int toSq = move.to();
+        int fromSq = move.from();
+        int attackerPiece = board.getSquare(fromSq);
+        if (Piece.isEmpty(attackerPiece)) return 0;
+
+        // Capturi: target value
+        int targetValue;
+        if (move.isEnPassant()) {
+            targetValue = MVV_VALUES[Piece.PAWN];
+        } else {
+            int target = board.getSquare(toSq);
+            if (Piece.isEmpty(target)) return 0; // non-capture
+            targetValue = MVV_VALUES[Piece.type(target)];
+        }
+
+        boolean[] used = SEE_USED_SCRATCH;
+        for (int i = 0; i < 64; i++) used[i] = false;
+        used[fromSq] = true;
+
+        int[] gain = new int[32];
+        int d = 0;
+        gain[0] = targetValue;
+
+        int attackerType = Piece.type(attackerPiece);
+        int side = (Piece.color(attackerPiece) == Piece.WHITE) ? Piece.BLACK : Piece.WHITE;
+
+        while (true) {
+            d++;
+            if (d >= gain.length) break;
+            gain[d] = MVV_VALUES[attackerType] - gain[d - 1];
+            if (Math.max(-gain[d - 1], gain[d]) < 0) break;
+
+            int nextSq = findSmallestAttacker(board, toSq, side, used);
+            if (nextSq == -1) break;
+            used[nextSq] = true;
+            attackerType = Piece.type(board.getSquare(nextSq));
+            side = (side == Piece.WHITE) ? Piece.BLACK : Piece.WHITE;
+
+            // Daca am ajuns sa folosim regele si pătratul e inca atacat de adversar, oprire
+            // (regele nu poate captura un patrat aparat — sub atac)
+            if (attackerType == Piece.KING) {
+                if (findSmallestAttacker(board, toSq, side, used) != -1) {
+                    d--;
+                    break;
+                }
+            }
+        }
+
+        // Minimax backward — fiecare parte joaca optim
+        while (--d > 0) {
+            gain[d - 1] = -Math.max(-gain[d - 1], gain[d]);
+        }
+        return gain[0];
+    }
+
+    /**
+     * Gaseste patratul celei mai mici piese de culoarea `attackerColor` care
+     * ataca `targetSq`, excluzand piesele deja marcate ca used.
+     * Returneaza -1 daca niciuna.
+     */
+    private int findSmallestAttacker(Board board, int targetSq, int attackerColor, boolean[] used) {
+        int targetRow = targetSq >>> 3;
+        int targetCol = targetSq & 7;
+
+        // PION — atacatorul vine din directie inversa
+        int pawnDir = (attackerColor == Piece.WHITE) ? -1 : 1;
+        for (int dc = -1; dc <= 1; dc += 2) {
+            int r = targetRow + pawnDir;
+            int c = targetCol + dc;
+            if (r < 0 || r > 7 || c < 0 || c > 7) continue;
+            int sq = r * 8 + c;
+            if (used[sq]) continue;
+            int p = board.getSquare(sq);
+            if (!Piece.isEmpty(p) && Piece.color(p) == attackerColor && Piece.type(p) == Piece.PAWN) {
+                return sq;
+            }
+        }
+
+        // CAL — 8 jumpuri
+        for (int jump : KNIGHT_JUMPS) {
+            int sq = targetSq + jump;
+            if (sq < 0 || sq >= 64) continue;
+            if (Math.abs((sq & 7) - targetCol) > 2) continue;
+            if (used[sq]) continue;
+            int p = board.getSquare(sq);
+            if (!Piece.isEmpty(p) && Piece.color(p) == attackerColor && Piece.type(p) == Piece.KNIGHT) {
+                return sq;
+            }
+        }
+
+        // NEBUN — diagonale
+        int bishopSq = scanForSliding(board, targetSq, attackerColor, BISHOP_DIRS, Piece.BISHOP, used);
+        if (bishopSq != -1) return bishopSq;
+
+        // TURA — ortogonal
+        int rookSq = scanForSliding(board, targetSq, attackerColor, ROOK_DIRS, Piece.ROOK, used);
+        if (rookSq != -1) return rookSq;
+
+        // REGINA — toate 8 directiile (verifica separat de bishop/rook ca tip)
+        int queenSq = scanForSliding(board, targetSq, attackerColor, QUEEN_DIRS, Piece.QUEEN, used);
+        if (queenSq != -1) return queenSq;
+
+        // REGE — adiacent
+        for (int dir : KING_MOVES) {
+            int sq = targetSq + dir;
+            if (sq < 0 || sq >= 64) continue;
+            if (Math.abs((sq & 7) - targetCol) > 1) continue;
+            if (used[sq]) continue;
+            int p = board.getSquare(sq);
+            if (!Piece.isEmpty(p) && Piece.color(p) == attackerColor && Piece.type(p) == Piece.KING) {
+                return sq;
+            }
+        }
+
+        return -1;
+    }
+
+    private static final int[] ROOK_DIRS    = { 8, -8, 1, -1 };
+    private static final int[] BISHOP_DIRS  = { 9, 7, -7, -9 };
+    private static final int[] QUEEN_DIRS   = { 8, -8, 1, -1, 9, 7, -7, -9 };
+    private static final int[] KNIGHT_JUMPS = { 17, 15, 10, 6, -6, -10, -15, -17 };
+    private static final int[] KING_MOVES   = { 8, -8, 1, -1, 9, 7, -7, -9 };
+
+    private int scanForSliding(Board board, int targetSq, int attackerColor,
+                                int[] dirs, int pieceType, boolean[] used) {
+        for (int dir : dirs) {
+            int cur = targetSq;
+            while (true) {
+                int prevCol = cur & 7;
+                cur += dir;
+                if (cur < 0 || cur >= 64) break;
+                int curCol = cur & 7;
+                // Wrap-around check pentru directiile cu componenta orizontala
+                if ((dir == 1 || dir == -1 || dir == 9 || dir == -9 || dir == 7 || dir == -7)
+                        && Math.abs(prevCol - curCol) != 1) break;
+
+                int p = board.getSquare(cur);
+                if (Piece.isEmpty(p)) continue;
+                if (used[cur]) continue;
+                if (Piece.color(p) == attackerColor && Piece.type(p) == pieceType) {
+                    return cur;
+                }
+                // Piesa blocheaza (chiar daca nu e tipul cautat) — oprim pe directia asta
+                break;
+            }
+        }
+        return -1;
     }
 }

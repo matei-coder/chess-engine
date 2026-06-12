@@ -17,6 +17,11 @@ public class Board {
     // La 100 (50 mutari complete) se aplica regula celor 50 de mutari → remiza.
     private int halfmoveClock = 0;
 
+    // Pozitiile cache-uite ale regilor — actualizate incremental in make/unmake.
+    // Salveaza milioane de findKing() scans per search.
+    private int whiteKingSq = -1;
+    private int blackKingSq = -1;
+
     // -------------------------------------------------------------------------
     // Tablouri Zobrist — numere random per (piesa, patrat) si stari auxiliare
     // -------------------------------------------------------------------------
@@ -41,6 +46,7 @@ public class Board {
 
     public Board() {
         loadStartingPosition();
+        recomputeKingPositions();
         recomputeZobristHash();
     }
 
@@ -96,6 +102,38 @@ public class Board {
         castlingRights  = new boolean[]{ false, false, false, false };
         zobristHash     = 0L;
         halfmoveClock   = 0;
+        whiteKingSq     = -1;
+        blackKingSq     = -1;
+    }
+
+    // Scaneaza tabla si gaseste pozitiile regilor. Folosit dupa load FEN.
+    public void recomputeKingPositions() {
+        whiteKingSq = -1;
+        blackKingSq = -1;
+        for (int sq = 0; sq < 64; sq++) {
+            int piece = squares[sq];
+            if (Piece.type(piece) == Piece.KING) {
+                if (Piece.isWhite(piece)) whiteKingSq = sq;
+                else                       blackKingSq = sq;
+            }
+        }
+    }
+
+    public int getKingSq(int color) {
+        return (color == Piece.WHITE) ? whiteKingSq : blackKingSq;
+    }
+
+    // Deep copy — folosit de Lazy SMP, fiecare worker thread are propriul Board
+    public Board deepCopy() {
+        Board b = new Board();   // initializez cu pozitia de start (apoi suprascriu)
+        System.arraycopy(this.squares, 0, b.squares, 0, 64);
+        b.enPassantSquare = this.enPassantSquare;
+        b.castlingRights  = this.castlingRights.clone();
+        b.zobristHash     = this.zobristHash;
+        b.halfmoveClock   = this.halfmoveClock;
+        b.whiteKingSq     = this.whiteKingSq;
+        b.blackKingSq     = this.blackKingSq;
+        return b;
     }
 
     public int getEnPassantSquare() { return enPassantSquare; }
@@ -158,6 +196,12 @@ public class Board {
         int color = Piece.color(piece);
         int capturedPiece = squares[to];
         int oldEp = enPassantSquare;
+
+        // Cache king position — update incremental
+        if (Piece.type(piece) == Piece.KING) {
+            if (color == Piece.WHITE) whiteKingSq = to;
+            else                       blackKingSq = to;
+        }
 
         // Halfmove clock: 0 daca e mutare de pion sau captura (inclusiv EP), altfel +1
         boolean isPawnMove = Piece.type(piece) == Piece.PAWN;
@@ -251,6 +295,12 @@ public class Board {
         int from  = move.from();
         int to    = move.to();
         int color = Piece.color(squares[to]);
+
+        // Restauram cache-ul regelui (piesa de pe `to` inca e regele dupa make, inainte de unmake)
+        if (Piece.type(squares[to]) == Piece.KING) {
+            if (color == Piece.WHITE) whiteKingSq = from;
+            else                       blackKingSq = from;
+        }
 
         // Restauram starea anterioara — inclusiv hash-ul, evitand recalcul incremental
         enPassantSquare = state.enPassantSquare;

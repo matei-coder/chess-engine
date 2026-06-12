@@ -48,20 +48,30 @@ public class TranspositionTable {
 
     public int sizeEntries() { return sizeEntries; }
 
+    // XOR trick pentru lock-free safety in Lazy SMP:
+    //   store: keys[idx] = key XOR data; data[idx] = data
+    //   probe: valid daca (keys[idx] XOR data[idx]) == key
+    // Torn writes (un thread schimba keys, alt thread schimba data) sunt
+    // detectate ca miss (mai sigur decat hit invalid).
+
     public long probe(long key) {
         int idx = (int)(key & mask);
-        if (keys[idx] == key) return data[idx];
-        return 0L; // 0L = miss (depth=0, no move, score=0) — caller verifica prin probeKeyMatches
+        long storedKey = keys[idx];
+        long storedData = data[idx];
+        if ((storedKey ^ storedData) == key) return storedData;
+        return 0L;
     }
 
     public boolean keyMatches(long key) {
-        return keys[(int)(key & mask)] == key;
+        int idx = (int)(key & mask);
+        return (keys[idx] ^ data[idx]) == key;
     }
 
     public void store(long key, int depth, int score, int flag, int packedMove) {
         int idx = (int)(key & mask);
-        keys[idx] = key;
-        data[idx] = pack(depth, flag, score, packedMove);
+        long packed = pack(depth, flag, score, packedMove);
+        keys[idx] = key ^ packed;
+        data[idx] = packed;
     }
 
     // -------------------------------------------------------------------------

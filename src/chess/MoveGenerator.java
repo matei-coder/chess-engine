@@ -346,23 +346,18 @@ public class MoveGenerator {
     // DETECTIA SAHULUI
     // -------------------------------------------------------------------------
 
-    // Returneaza true daca `color` e in sah pe tabla curenta
+    // Returneaza true daca `color` e in sah pe tabla curenta.
+    // Foloseste cache-ul de rege din Board (O(1) vs O(64) scan).
     public boolean isInCheck(Board board, int color) {
-        int kingSq = findKing(board, color);
-        if (kingSq == -1) return false; // nu ar trebui sa se intample
+        int kingSq = board.getKingSq(color);
+        if (kingSq == -1) return false;
         int attacker = (color == Piece.WHITE) ? Piece.BLACK : Piece.WHITE;
         return isSquareAttacked(board, kingSq, attacker);
     }
 
-    // Gaseste patratul regelui de culoarea data
+    // Backward-compat — deleguăm la cache. Niciun caller intern nu mai e activ.
     public int findKing(Board board, int color) {
-        for (int sq = 0; sq < 64; sq++) {
-            int piece = board.getSquare(sq);
-            if (Piece.type(piece) == Piece.KING && Piece.color(piece) == color) {
-                return sq;
-            }
-        }
-        return -1;
+        return board.getKingSq(color);
     }
 
     // Returneaza true daca patratul `sq` e atacat de `attackerColor`
