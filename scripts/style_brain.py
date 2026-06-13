@@ -232,12 +232,35 @@ class MLPBrain(StyleBrain):
         n = np.linalg.norm(x)
         return x / n if n > 0 else x
 
+    def _token_coverage(self, text: str) -> tuple[int, int, int]:
+        """(total_tokens, known_words, signal_tokens).
+
+        known_words   = tokenuri prezente direct în vocabular (semnal puternic)
+        signal_tokens = tokenuri care contribuie ceva (cuvânt SAU trigramă)
+        """
+        toks = tokenize(text)
+        known_words = 0
+        signal = 0
+        for t in toks:
+            is_word = t in self.vocab["words"]
+            if is_word:
+                known_words += 1
+            padded = "^" + t + "$"
+            has_tri = any(padded[i:i+3] in self.vocab["trigrams"]
+                          for i in range(len(padded) - 2))
+            if is_word or has_tri:
+                signal += 1
+        return len(toks), known_words, signal
+
     def predict(self, text: str) -> tuple[dict[str, float], dict[str, int]]:
         np = self.np
+        total, known_words, signal = self._token_coverage(text)
+        cov = {"mode": "mlp_v2", "input_tokens": total,
+               "known_words": known_words, "signal_tokens": signal}
         x = self._encode(text)
         if np.linalg.norm(x) < 1e-6:
             # Niciun token cunoscut — return neutru
-            return {}, {}
+            return {}, cov
         # Forward (no dropout in eval)
         h = np.maximum(0, x @ self.W1 + self.b1)
         z = h @ self.W2 + self.b2
@@ -257,8 +280,7 @@ class MLPBrain(StyleBrain):
             v = max(0.5, min(2.0, v))
             modifiers[name] = round(v, 3)
 
-        info = {"mode": "mlp_v2", "input_tokens": len(tokenize(text))}
-        return modifiers, info
+        return modifiers, cov
 
 
 # =============================================================================
@@ -361,7 +383,9 @@ def process_text(text: str, brain: StyleBrain, verbose: bool = True) -> bool:
     if not modifiers:
         if verbose:
             if mode.startswith("mlp"):
-                print(f"[{_ts()}] [brain/{mode}] ❌ niciun token recunoscut in vocab pentru: {text!r}", file=sys.stderr)
+                total = detected.get("input_tokens", 0)
+                print(f"[{_ts()}] [brain/{mode}] ❌ 0/{total} cuvinte recunoscute în vocab pentru: {text!r}", file=sys.stderr)
+                print(f"           încearcă termeni de șah mai uzuali (RO/EN) sau reformulează.", file=sys.stderr)
             else:
                 print(f"[{_ts()}] [brain/{mode}] ❌ niciun keyword recunoscut in: {text!r}", file=sys.stderr)
                 print(f"           keywords v1 disponibile: {', '.join(sorted(KEYWORDS.keys()))}", file=sys.stderr)
@@ -372,7 +396,18 @@ def process_text(text: str, brain: StyleBrain, verbose: bool = True) -> bool:
     write_style_file(modifiers, desc)
     if verbose:
         if mode.startswith("mlp"):
-            print(f"[{_ts()}] [brain/{mode}] ✓ inferred from {detected.get('input_tokens', '?')} tokens")
+            total = detected.get("input_tokens", 0) or 1
+            known = detected.get("known_words", 0)
+            signal = detected.get("signal_tokens", 0)
+            cov = signal / total
+            # Confidence label pe baza acoperirii vocabularului
+            if known == 0:
+                conf = "⚠ scăzută (doar potriviri parțiale — rezultat aproximativ)"
+            elif cov < 0.5:
+                conf = "⚠ medie (jumătate din cuvinte necunoscute)"
+            else:
+                conf = "ridicată"
+            print(f"[{_ts()}] [brain/{mode}] ✓ {known}/{total} cuvinte în vocab · încredere: {conf}")
         else:
             kw_str = ", ".join(f"{k}×{v}" for k, v in sorted(detected.items()) if isinstance(v, int))
             print(f"[{_ts()}] [brain/v1] ✓ keywords: {kw_str}")
@@ -382,6 +417,150 @@ def process_text(text: str, brain: StyleBrain, verbose: bool = True) -> bool:
             print(f"             {arrow} {k:18} = {v}")
         print(f"           → wrote {CURRENT.relative_to(REPO_DIR)}")
     return True
+
+
+def _read_current() -> dict | None:
+    """Conținutul styles/current.json sau None dacă lipsește/corupt."""
+    try:
+        with open(CURRENT, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def _print_modifiers(modifiers: dict[str, float], indent: str = "  ") -> None:
+    if not modifiers:
+        print(f"{indent}(neutru — niciun modifier)")
+        return
+    for k, v in sorted(modifiers.items()):
+        arrow = "↑" if v > 1.0 else "↓"
+        print(f"{indent}{arrow} {k:18} = {v}")
+
+
+def _diff_modifiers(old: dict[str, float], new: dict[str, float]) -> None:
+    keys = sorted(set(old) | set(new))
+    changed = False
+    for k in keys:
+        a, b = old.get(k), new.get(k)
+        if a == b:
+            continue
+        changed = True
+        if a is None:
+            print(f"  + {k:18} = {b}")
+        elif b is None:
+            print(f"  - {k:18} (era {a})")
+        else:
+            arrow = "↑" if b > a else "↓"
+            print(f"  {arrow} {k:18} {a} → {b}")
+    if not changed:
+        print("  (fără diferențe)")
+
+
+_META_HELP = """Comenzi REPL:
+  :show        afișează stilul activ (current.json)
+  :undo        revino la stilul anterior
+  :diff        diferența față de stilul anterior
+  :save <nume> salvează stilul curent în styles/<nume>.json
+  :help        afișează acest mesaj
+  :quit        ieșire (sau Ctrl-D)
+Orice altă linie = descriere de stil în limbaj natural."""
+
+
+def _handle_meta(line: str, undo_stack: list[dict]) -> bool:
+    """Procesează o comandă ':...'. Returnează False dacă trebuie să ieșim."""
+    parts = line[1:].split(maxsplit=1)
+    cmd = parts[0].lower() if parts else ""
+    arg = parts[1].strip() if len(parts) > 1 else ""
+
+    if cmd in ("quit", "q", "exit"):
+        return False
+    if cmd in ("help", "h", "?"):
+        print(_META_HELP)
+    elif cmd in ("show", "s"):
+        cur = _read_current()
+        if cur is None:
+            print("  (niciun stil activ încă)")
+        else:
+            print(f"  {cur.get('description', '')}")
+            _print_modifiers(cur.get("modifiers", {}))
+    elif cmd in ("diff", "d"):
+        cur = _read_current() or {}
+        if not undo_stack:
+            print("  (nu există stil anterior de comparat)")
+        else:
+            _diff_modifiers(undo_stack[-1].get("modifiers", {}), cur.get("modifiers", {}))
+    elif cmd in ("undo", "u"):
+        if not undo_stack:
+            print("  (nimic de anulat)")
+        else:
+            prev = undo_stack.pop()
+            write_style_file(prev.get("modifiers", {}), prev.get("description", "undo"))
+            print("  ↩ stil anterior restaurat:")
+            _print_modifiers(prev.get("modifiers", {}))
+    elif cmd in ("save",):
+        if not arg:
+            print("  usage: :save <nume>")
+        else:
+            name = re.sub(r"[^A-Za-z0-9_-]", "", arg)
+            if not name or name in ("current", "vector_sample"):
+                print(f"  nume invalid sau rezervat: {arg!r}")
+            else:
+                cur = _read_current()
+                if cur is None:
+                    print("  (niciun stil activ de salvat)")
+                else:
+                    dest = STYLES_DIR / f"{name}.json"
+                    with open(dest, "w", encoding="utf-8") as f:
+                        json.dump(cur, f, indent=2, ensure_ascii=False)
+                    print(f"  💾 salvat în {dest.relative_to(REPO_DIR)}")
+    else:
+        print(f"  comandă necunoscută: :{cmd}  (scrie :help)")
+    return True
+
+
+def _setup_readline() -> None:
+    """Istoric persistent + editare linie (săgeți, Ctrl-A/E) dacă readline e disponibil."""
+    try:
+        import readline
+    except ImportError:
+        return
+    import atexit
+    histfile = Path.home() / ".brain_history"
+    try:
+        readline.read_history_file(histfile)
+    except OSError:
+        pass
+    readline.set_history_length(1000)
+    atexit.register(lambda: _save_history(readline, histfile))
+
+
+def _save_history(readline, histfile: Path) -> None:
+    try:
+        readline.write_history_file(histfile)
+    except OSError:
+        pass
+
+
+def run_repl(brain: StyleBrain, actual_mode: str) -> None:
+    print_banner(actual_mode)
+    _setup_readline()
+    prompt = "\033[36m♞ ›\033[0m " if sys.stdout.isatty() else "brain> "
+    undo_stack: list[dict] = []
+    try:
+        while True:
+            line = input(prompt).strip()
+            if not line:
+                continue
+            if line.startswith(":"):
+                if not _handle_meta(line, undo_stack):
+                    break
+                continue
+            # Descriere în limbaj natural → capturăm starea pt. undo/diff
+            before = _read_current()
+            if process_text(line, brain) and before is not None:
+                undo_stack.append(before)
+    except (EOFError, KeyboardInterrupt):
+        print()
 
 
 def main():
@@ -411,15 +590,7 @@ def main():
         print(f"[brain] auto-selected: {actual_mode}", file=sys.stderr)
 
     if args.interactive:
-        print_banner(actual_mode)
-        prompt = "\033[36m♞ ›\033[0m " if sys.stdout.isatty() else "brain> "
-        try:
-            while True:
-                line = input(prompt).strip()
-                if line:
-                    process_text(line, brain)
-        except (EOFError, KeyboardInterrupt):
-            print()
+        run_repl(brain, actual_mode)
         return
 
     if not args.text:

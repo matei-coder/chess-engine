@@ -17,6 +17,7 @@ public class Search {
     private static final int SCORE_CAPTURE     =  1_000_000;   // good captures (SEE >= 0)
     private static final int SCORE_KILLER1     =    800_000;
     private static final int SCORE_KILLER2     =    790_000;
+    private static final int SCORE_COUNTER     =    750_000;   // counter move pentru prev move adverse
     private static final int SCORE_BAD_CAPTURE =    700_000;   // bad captures (SEE < 0) — dupa killers
 
     private static final int MAX_PLY = 128;
@@ -24,7 +25,8 @@ public class Search {
     private final MoveGenerator    generator = new MoveGenerator();
     private final StyleOrchestrator style;
     private final Evaluator        evaluator;
-    private       TranspositionTable tt    = new TranspositionTable(16);
+    // TT default mai mare (128 MB) — reduce contention la multi-thread
+    private       TranspositionTable tt    = new TranspositionTable(128);
 
     // -------------------------------------------------------------------------
     // Constructori
@@ -57,11 +59,23 @@ public class Search {
     private final java.util.List<Search> workers = new java.util.ArrayList<>();
     private final java.util.List<Thread> workerThreads = new java.util.ArrayList<>();
     private boolean isWorker = false;   // true daca acest Search e un worker (suprima output)
+    private int     workerId = 0;       // 0 = main, 1..N = workers (folosit pentru staggered depth + perturbation seed)
 
     public void setThreadCount(int n) {
         threadCount = Math.max(1, Math.min(8, n));
     }
     public int getThreadCount() { return threadCount; }
+
+    // Adauga perturbatie aleatoare la history table — forteaza workerii sa
+    // exploreze ordini de mutari diferite (foundation pentru Lazy SMP).
+    private void perturbHistoryForWorker() {
+        java.util.Random rng = new java.util.Random(0xCAFEBABE ^ (long) workerId);
+        for (int p = 0; p < 12; p++) {
+            for (int sq = 0; sq < 64; sq++) {
+                history[p][sq] = rng.nextInt(11) - 5;  // -5..+5 noise
+            }
+        }
+    }
 
     // -------------------------------------------------------------------------
     // Stare per search
@@ -94,6 +108,11 @@ public class Search {
     // Index: (color==WHITE?0:6) + (type-1) = 0..11
     private final int[][] history = new int[12][64];
 
+    // Counter moves heuristic: cand un quiet move produce cutoff in raspuns la
+    // un anumit move advers, salveaza-l ca "counter" pentru acela.
+    // Index: (pieceIdx, to_sq) al mutarii anterioare → packed counter move
+    private final int[][] counterMove = new int[12][64];
+
     // Istoricul jocului — hash-urile pozitiilor INAINTE de fiecare mutare reala.
     // Setat extern de Uci.handlePosition. Folosit pentru detectarea repetitiei.
     private long[] gameHistory    = new long[0];
@@ -101,6 +120,10 @@ public class Search {
 
     // Hash-urile pozitiilor pe drumul curent de search (per ply).
     private final long[] searchHistory = new long[MAX_PLY];
+
+    // Per-ply tracking pentru counter moves heuristic.
+    // prevMoveByPly[N] = mutarea facuta la ply N-1 (de adversar) pentru a ajunge aici.
+    private final int[] prevMoveByPly = new int[MAX_PLY];
 
     // -------------------------------------------------------------------------
     // API public — pastram semnaturile vechi pentru Main interactiv
@@ -131,16 +154,23 @@ public class Search {
         if (threadCount > 1 && !isWorker) {
             for (int i = 0; i < threadCount - 1; i++) {
                 final Search w = new Search(style, tt);
-                w.isWorker      = true;
-                w.gameHistory   = this.gameHistory;
+                w.isWorker       = true;
+                w.workerId       = i + 1;
+                w.gameHistory    = this.gameHistory;
                 w.gameHistoryLen = this.gameHistoryLen;
-                w.stopFlag      = false;
-                w.ponderMode    = isPonder;
-                w.deadline      = this.deadline;
+                w.stopFlag       = false;
+                w.ponderMode     = isPonder;
+                w.deadline       = this.deadline;
+                // Perturbează history pentru diversitate vs main thread
+                w.perturbHistoryForWorker();
                 workers.add(w);
                 final Board workerBoard = board.deepCopy();
+                // Staggered: workeri impari pornesc de la depth 2 (skip depth 1).
+                // Workeri pari pornesc de la depth 1 (ca main).
+                // Asta crează faze diferite in iterative deepening.
+                final int startDepth = ((i + 1) % 2 == 1) ? 2 : 1;
                 Thread t = new Thread(() -> {
-                    w.iterativeDeepening(workerBoard, colorToMove, maxDepth, timeLimitMs);
+                    w.iterativeDeepeningFromDepth(workerBoard, colorToMove, maxDepth, timeLimitMs, startDepth);
                 }, "Search-Worker-" + (i + 1));
                 t.setDaemon(true);
                 workerThreads.add(t);
@@ -206,15 +236,23 @@ public class Search {
     }
 
     private void resetSearchState() {
-        for (int i = 0; i < MAX_PLY; i++) { killer1[i] = 0; killer2[i] = 0; }
+        for (int i = 0; i < MAX_PLY; i++) { killer1[i] = 0; killer2[i] = 0; prevMoveByPly[i] = 0; }
         for (int p = 0; p < 12; p++)
-            for (int sq = 0; sq < 64; sq++) history[p][sq] = 0;
+            for (int sq = 0; sq < 64; sq++) {
+                history[p][sq] /= 2;       // aging — pastreaza ceva info din ultimul joc
+                counterMove[p][sq] = 0;
+            }
     }
 
     // -------------------------------------------------------------------------
     // Iterative deepening cu aspiration windows
     // -------------------------------------------------------------------------
     private Move iterativeDeepening(Board board, int colorToMove, int maxDepth, long timeLimitMs) {
+        return iterativeDeepeningFromDepth(board, colorToMove, maxDepth, timeLimitMs, 1);
+    }
+
+    // Variant care permite start depth diferit (folosit de workeri staggered)
+    private Move iterativeDeepeningFromDepth(Board board, int colorToMove, int maxDepth, long timeLimitMs, int startDepth) {
         this.timeLimit = timeLimitMs;
         this.startTime = System.currentTimeMillis();
         this.timeUp    = false;
@@ -224,7 +262,7 @@ public class Search {
         Move bestSoFar = null;
         int  prevScore = 0;
 
-        for (int depth = 1; depth <= maxDepth; depth++) {
+        for (int depth = startDepth; depth <= maxDepth; depth++) {
             int alpha = NEG_INF;
             int beta  = INF;
             int window = 50;
@@ -325,6 +363,13 @@ public class Search {
             if (hasInsufficientMaterial(board)) return 0;
             // Repetitie (conservator: tratam a 2-a aparitie ca remiza in search)
             if (isRepetition(currentHash, ply)) return 0;
+
+            // Mate distance pruning — daca scorul cel mai bun posibil la `ply`
+            // nu poate depasi alpha-ul curent sau beta-ul nu poate scadea sub
+            // scorul actual, taiem. Pure correctitudine, nu schimba rezultatul.
+            alpha = Math.max(alpha, -MATE_VAL + ply);
+            beta  = Math.min(beta,   MATE_VAL - ply - 1);
+            if (alpha >= beta) return alpha;
         }
 
         // Inregistram hash-ul pozitiei curente pentru detectia repetitiei la copii
@@ -361,12 +406,18 @@ public class Search {
         // -------- Reverse Futility Pruning (static null move) --------
         // Daca eval static e cu mult peste beta, presupunem ca poziţia e atat
         // de buna incat oponentul nu poate recupera → cutoff fara search.
-        // Tipic +20-50 ELO, 5 linii.
+        int staticEval = (!isPV && !inCheck) ? evaluator.evaluate(board, color) : 0;
         if (!isPV && !inCheck && depth <= 6 && beta < MATE_VAL - MAX_PLY) {
-            int eval = evaluator.evaluate(board, color);
-            if (eval - 100 * depth >= beta) {
-                return eval;
+            if (staticEval - 100 * depth >= beta) {
+                return staticEval;
             }
+        }
+
+        // -------- Razoring (depth ≤ 2, eval mult sub alpha → quiescence verifier) --------
+        // Daca eval e atat de sub alpha incat quiescence nu poate compensa, cutoff.
+        if (!isPV && !inCheck && depth <= 2 && staticEval + 200 + 100 * depth < alpha) {
+            int qScore = quiescence(board, color, alpha - 1, alpha, ply);
+            if (qScore < alpha) return qScore;
         }
 
         // -------- Null Move Pruning --------
@@ -375,6 +426,7 @@ public class Search {
         if (!isPV && !inCheck && depth >= 3 && hasNonPawnMaterial(board, color) && beta < MATE_VAL - MAX_PLY) {
             int oldEp = board.getEnPassantSquare();
             board.setEnPassantSquare(-1);
+            if (ply + 1 < MAX_PLY) prevMoveByPly[ply + 1] = TranspositionTable.NO_MOVE;
             int nullScore = -alphaBeta(board, opponent(color), depth - 1 - 2,
                                        -beta, -beta + 1, false, ply + 1, false);
             board.setEnPassantSquare(oldEp);
@@ -383,6 +435,17 @@ public class Search {
                 // Stocam in TT ca lower bound
                 tt.store(ttKey, depth, beta, TranspositionTable.FLAG_LOWER, ttMove);
                 return beta;
+            }
+        }
+
+        // -------- Internal Iterative Deepening (IID) --------
+        // PV node fara TT move + depth mare → search redus pentru a obtine TT move
+        if (isPV && ttMove == TranspositionTable.NO_MOVE && depth >= 5) {
+            alphaBeta(board, color, depth - 2, alpha, beta, false, ply, true);
+            // Reciteste TT
+            if (tt.keyMatches(ttKey)) {
+                long entry = tt.probe(ttKey);
+                ttMove = TranspositionTable.unpackMove(entry);
             }
         }
 
@@ -419,8 +482,7 @@ public class Search {
 
             // -------- Late Move Pruning (LMP) --------
             // La depth mic + multe mutari tacute deja incercate, sarim mutarile
-            // ramase complet. Tipic +30-50 ELO, mai ales la blitz/bullet.
-            // Scapa: PV node, in sah, da sah, captura, promotie, killer move.
+            // ramase complet.
             if (!isPV && !inCheck && depth <= 3 && isQuiet && !givesCheck
                     && legalCount > 5 + depth * depth
                     && bestScore > -MATE_VAL + MAX_PLY) {
@@ -428,11 +490,30 @@ public class Search {
                 continue;
             }
 
-            // -------- Late Move Reductions --------
+            // -------- Futility Pruning frontier (depth 1) --------
+            // La frontier, daca eval + cea mai mare captura + margin < alpha,
+            // mutarea quiet sigur nu schimba alpha → skip.
+            if (!isPV && !inCheck && depth == 1 && isQuiet && !givesCheck
+                    && bestScore > -MATE_VAL + MAX_PLY
+                    && staticEval + 200 < alpha) {
+                board.unmakeMove(move, state);
+                continue;
+            }
+
+            // -------- Late Move Reductions (formula logaritmică Stockfish-style) --------
             int reduction = 0;
             if (depth >= 3 && legalCount > 3 && isQuiet && !givesCheck) {
-                reduction = 1;
-                if (legalCount > 6) reduction = 2;
+                // reduction = log(depth) * log(moveIndex) / 2
+                double r = Math.log(depth) * Math.log(legalCount) / 2.0;
+                reduction = (int) r;
+                if (reduction < 1) reduction = 1;
+                // Cap la depth - 1 (sa nu producem depth negativ)
+                if (reduction > depth - 1) reduction = depth - 1;
+            }
+
+            // Setam prevMove pentru recursie (counter moves la copilul)
+            if (ply + 1 < MAX_PLY) {
+                prevMoveByPly[ply + 1] = TranspositionTable.encodeMove(move);
             }
 
             int score;
@@ -470,7 +551,7 @@ public class Search {
             if (score > alpha) alpha = score;
 
             if (alpha >= beta) {
-                // Beta cutoff — updateaza killers si history daca e tacuta
+                // Beta cutoff — updateaza killers + history + counter moves daca e tacuta
                 if (isQuiet) {
                     int packed = TranspositionTable.encodeMove(move);
                     if (killer1[ply] != packed) {
@@ -479,6 +560,17 @@ public class Search {
                     }
                     int pieceIdx = historyIndex(board.getSquare(move.from()));
                     history[pieceIdx][move.to()] += depth * depth;
+
+                    // Counter move: marcheaza ca raspuns la prev move adverse
+                    int prevPacked = prevMoveByPly[ply];
+                    if (prevPacked != TranspositionTable.NO_MOVE) {
+                        int prevTo = prevPacked & 0x3F;
+                        int prevPieceOnTo = board.getSquare(prevTo);
+                        if (!Piece.isEmpty(prevPieceOnTo)) {
+                            int prevPieceIdx = historyIndex(prevPieceOnTo);
+                            counterMove[prevPieceIdx][prevTo] = packed;
+                        }
+                    }
                 }
                 break;
             }
@@ -572,6 +664,19 @@ public class Search {
         if (ply < MAX_PLY) {
             if (packed == killer1[ply]) return SCORE_KILLER1;
             if (packed == killer2[ply]) return SCORE_KILLER2;
+
+            // Counter move heuristic — daca acest move e counter pentru prev move advers
+            int prevPacked = prevMoveByPly[ply];
+            if (prevPacked != TranspositionTable.NO_MOVE) {
+                int prevTo = prevPacked & 0x3F;
+                int prevPieceOnTo = board.getSquare(prevTo);
+                if (!Piece.isEmpty(prevPieceOnTo)) {
+                    int prevPieceIdx = historyIndex(prevPieceOnTo);
+                    if (counterMove[prevPieceIdx][prevTo] == packed) {
+                        return SCORE_COUNTER;
+                    }
+                }
+            }
         }
 
         int pieceIdx = historyIndex(board.getSquare(move.from()));

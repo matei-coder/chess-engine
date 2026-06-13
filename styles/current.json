@@ -1,15 +1,12 @@
 {
   "version": 1,
-  "description": "style_brain MLP v2 from text: 'sacrifice knights'",
+  "description": "style_brain MLP v2 from text: 'qwxz blah unknownword'",
   "modifiers": {
-    "MAT_PAWN": 0.965,
-    "MAT_BISHOP": 0.962,
-    "MAT_ROOK": 0.976,
-    "MAT_QUEEN": 0.972,
-    "PST_PAWN": 0.987,
-    "PST_KNIGHT": 1.03,
-    "PST_BISHOP": 0.981,
-    "PST_QUEEN": 1.028,
-    "PAWN_ISOLATED_MG": 0.984
+    "MAT_PAWN": 1.037,
+    "MAT_BISHOP": 0.963,
+    "PST_BISHOP": 0.989,
+    "PST_ROOK": 1.033,
+    "PST_KING_MG": 0.971,
+    "PAWN_ISOLATED_MG": 1.026
   }
 }
